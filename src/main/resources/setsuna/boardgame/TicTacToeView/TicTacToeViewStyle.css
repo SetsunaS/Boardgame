@@ -1,0 +1,70 @@
+.rootPane{
+    /* Couleur */
+    -fx-background-color: #ffeaca;
+}
+
+.ticTacToeGridPane{
+    /* Bordure extérieur */
+    -fx-background-color: #88453a;
+}
+
+
+.button:focused{
+    -fx-border-color: transparent, transparent;
+    -fx-background-insets: 0;
+}
+
+.game-button{
+    /* Police */
+    -fx-font-weight: bold;
+
+    /* Taille */
+    -fx-pref-width: infinity;
+    -fx-pref-height: infinity;
+
+    /* Couleur */
+    -fx-border-color: transparent, transparent;
+    -fx-background-color: #e1ad6d;
+
+    /* Bordure */
+    -fx-background-radius: 0px;
+}
+
+.game-button:hover{
+    -fx-background-color: #ba5a1b;
+}
+
+
+.game-button.X{
+    -fx-text-fill: #2196f3;
+}
+
+.game-button.X:hover{
+    -fx-background-color: #e1ad6d;
+}
+
+.game-button.O{
+    -fx-text-fill: #f44336;
+}
+
+.game-button.O:hover{
+    -fx-background-color: #e1ad6d;
+}
+
+
+.blurOverlay{
+    /* Flou */
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+}
+
+.gameWinnerAnnounce{
+    /* Marges */
+    -fx-alignment: "CENTER";
+    -fx-spacing: 15.0
+}
+
+.label{
+    -fx-font-size: 50px;
+    -fx-font-weight: bold;
+    -fx-font-color: #ffeaca;
+}
