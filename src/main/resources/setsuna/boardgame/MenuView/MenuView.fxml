@@ -22,17 +22,21 @@
     <Region fx:id="blurOverlay" styleClass="blurOverlay" visible="false" managed="false"/>
 
     <VBox fx:id="gameConfigurationPane" styleClass="gameConfigurationPane" visible="false" managed="false">
-        <Button fx:id="playWithAIButton" onAction="#playWithAIButton" styleClass="gameButton" text="Play VS AI"/>
-        <Button fx:id="createRoomButton" onAction="#createRoom" styleClass="gameButton" text="Create room"/>
-        <GridPane styleClass="gridPane">
-            <TextField fx:id="gameNumberField" promptText="Game number" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <Button fx:id="joinRoomButton" onAction="#joinRoom" styleClass="gameButton" text="Join room" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <GridPane styleClass="gridPaneOutside">
+            <TextField fx:id="gameSizeField" promptText="Game size" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <GridPane styleClass="gridPaneInside" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                <Button fx:id="playWithAIButton" onAction="#playWithAIButton" styleClass="gameButton" text="Play VS AI" GridPane.rowIndex="0"/>
+                <Button fx:id="createRoomButton" onAction="#createRoom" styleClass="gameButton" text="Create room" GridPane.rowIndex="1"/>
+            </GridPane>
+
+            <TextField fx:id="gameNumberField" promptText="Game number" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <Button fx:id="joinRoomButton" onAction="#joinRoom" styleClass="gameButton" text="Join room" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
         </GridPane>
 
         <Button fx:id="cancelButton" onAction="#hideGameConfiguration" styleClass="cancelButton" text="Cancel">
-                <VBox.margin>
-                    <Insets top="15.0"/>
-                </VBox.margin>
+            <VBox.margin>
+                <Insets top="35.0"/>
+            </VBox.margin>
         </Button>
     </VBox>
 

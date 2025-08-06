@@ -36,13 +36,19 @@ public class MenuController{
     private VBox gameConfigurationPane;
 
     @FXML
+    private TextField gameSizeField;
+
+    @FXML
+    private Button playWithAIButton;
+
+    @FXML
+    private Button createRoomButton;
+
+    @FXML
     private TextField gameNumberField;
 
     @FXML
-    private Button joinGameButton;
-
-    @FXML
-    private Button newGameButton;
+    private Button joinRoomButton;
 
     @FXML
     private Button cancelButton;
@@ -100,7 +106,18 @@ public class MenuController{
             Scene currentScene=((Node)actionEvent.getSource()).getScene();
 
             //Scène à mettre
-            Parent newRoot=FXMLLoader.load(GameApplication.class.getResource("TicTacToeView.fxml"));
+            FXMLLoader loader=new FXMLLoader(GameApplication.class.getResource("TicTacToeView/TicTacToeView.fxml"));
+            Parent newRoot=loader.load();
+
+            //Initialiser la taille de la grille
+            int size=3;
+            try{
+                size=Integer.valueOf(gameSizeField.getText());
+            }
+            catch(Exception e){}
+
+            TicTacToeController ticTacToeController=loader.getController();
+            ticTacToeController.setGridSize(size);
 
             //Changement de scène
             currentScene.setRoot(newRoot);

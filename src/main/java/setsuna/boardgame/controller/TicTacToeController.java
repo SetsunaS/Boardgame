@@ -5,10 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import setsuna.boardgame.model.games.TicTacToe;
 import setsuna.boardgame.model.general.Pawn;
 import setsuna.boardgame.model.general.Player;
@@ -22,33 +19,6 @@ public class TicTacToeController{
     private GridPane ticTacToeGridPane;
 
     @FXML
-    private Button button00;
-
-    @FXML
-    private Button button01;
-
-    @FXML
-    private Button button02;
-
-    @FXML
-    private Button button10;
-
-    @FXML
-    private Button button11;
-
-    @FXML
-    private Button button12;
-
-    @FXML
-    private Button button20;
-
-    @FXML
-    private Button button21;
-
-    @FXML
-    private Button button22;
-
-    @FXML
     private Region blurOverlay;
 
     @FXML
@@ -57,7 +27,7 @@ public class TicTacToeController{
     @FXML
     private Label gameWinner;
 
-    private final TicTacToe game=new TicTacToe();
+    private TicTacToe game;
 
     @FXML
     private void initialize(){
@@ -68,21 +38,40 @@ public class TicTacToeController{
         //Fixe les marges
         ticTacToeGridPane.hgapProperty().bind(ticTacToeGridPane.heightProperty().multiply(0.01));
         ticTacToeGridPane.vgapProperty().bind(ticTacToeGridPane.heightProperty().multiply(0.01));
-
-        //Fixe la taille de la police des boutons
-        bindFontSize(button00);
-        bindFontSize(button01);
-        bindFontSize(button02);
-        bindFontSize(button10);
-        bindFontSize(button11);
-        bindFontSize(button12);
-        bindFontSize(button20);
-        bindFontSize(button21);
-        bindFontSize(button22);
     }
 
-    private void bindFontSize(Button button){
-        button.styleProperty().bind(button.widthProperty().divide(2.2).asString("-fx-font-size: %f;"));
+    //Créer la grille de jeu dynamiquement
+    public void setGridSize(int size){
+        game=new TicTacToe(size);
+        createBoard(size);
+    }
+
+    private void createBoard(int size){
+        for(int i=0; i<size; i++){
+            ColumnConstraints columnConstraints=new ColumnConstraints();
+            columnConstraints.setPercentWidth(100.0/size);
+            ticTacToeGridPane.getColumnConstraints().add(columnConstraints);
+
+            RowConstraints rowConstraints=new RowConstraints();
+            rowConstraints.setPercentHeight(100.0/size);
+            ticTacToeGridPane.getRowConstraints().add(rowConstraints);
+        }
+
+        for(int row=0; row<size; row++){
+            for(int col=0; col<size; col++){
+                //Création des boutons
+                Button button=new Button();
+                button.setId("button"+row+col);
+                button.getStyleClass().add("gameButton");
+                button.setOnAction(this::onGridButtonClick);
+
+                //Style des boutons
+                button.styleProperty().bind(ticTacToeGridPane.widthProperty().divide(size*2.2).asString("-fx-font-size: %f;"));
+                button.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
+                ticTacToeGridPane.add(button, col, row);
+            }
+        }
     }
 
     @FXML

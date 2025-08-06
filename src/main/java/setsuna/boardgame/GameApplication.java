@@ -13,7 +13,7 @@ public class GameApplication extends Application{
         stage.setMaximized(true);
         stage.setTitle("Boardgame");
 
-        FXMLLoader fxmlLoader=new FXMLLoader(GameApplication.class.getResource("MenuView.fxml"));
+        FXMLLoader fxmlLoader=new FXMLLoader(GameApplication.class.getResource("MenuView/MenuView.fxml"));
         Scene scene=new Scene(fxmlLoader.load());
 
         stage.setScene(scene);

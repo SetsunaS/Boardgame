@@ -14,7 +14,7 @@
     -fx-background-insets: 0;
 }
 
-.game-button{
+.gameButton{
     /* Police */
     -fx-font-weight: bold;
 
@@ -30,24 +30,24 @@
     -fx-background-radius: 0px;
 }
 
-.game-button:hover{
+.gameButton:hover{
     -fx-background-color: #ba5a1b;
 }
 
 
-.game-button.X{
+.gameButton.X{
     -fx-text-fill: #2196f3;
 }
 
-.game-button.X:hover{
+.gameButton.X:hover{
     -fx-background-color: #e1ad6d;
 }
 
-.game-button.O{
+.gameButton.O{
     -fx-text-fill: #f44336;
 }
 
-.game-button.O:hover{
+.gameButton.O:hover{
     -fx-background-color: #e1ad6d;
 }
 

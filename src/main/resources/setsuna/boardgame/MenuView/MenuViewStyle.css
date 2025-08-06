@@ -21,7 +21,14 @@
     -fx-spacing: 15.0
 }
 
-.gridPane{
+.gridPaneOutside{
+    /* Marges */
+    -fx-alignment: "CENTER";
+    -fx-vgap: 35;
+    -fx-hgap: 15;
+}
+
+.gridPaneInside{
     /* Marges */
     -fx-alignment: "CENTER";
     -fx-vgap: 15;
