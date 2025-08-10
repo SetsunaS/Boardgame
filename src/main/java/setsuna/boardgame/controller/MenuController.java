@@ -117,7 +117,7 @@ public class MenuController{
             catch(Exception e){}
 
             TicTacToeController ticTacToeController=loader.getController();
-            ticTacToeController.setGridSize(size);
+            ticTacToeController.createGameInterface(size);
 
             //Changement de scène
             currentScene.setRoot(newRoot);

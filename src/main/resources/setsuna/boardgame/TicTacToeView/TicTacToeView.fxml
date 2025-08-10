@@ -3,18 +3,28 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.Label?>
 
+<?import javafx.scene.control.Button?>
 <StackPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21.0.3"
            fx:controller="setsuna.boardgame.controller.TicTacToeController"
            fx:id="rootPane" styleClass="rootPane"
            stylesheets="@TicTacToeViewStyle.css">
 
-    <GridPane fx:id="ticTacToeGridPane" styleClass="ticTacToeGridPane">
-    </GridPane>
+    <VBox fx:id="allContentVBox" alignment="CENTER" spacing="9.0">
 
-    <Region fx:id="blurOverlay" styleClass="blurOverlay" visible="false" managed="false"/>
+        <HBox fx:id="annexeVBox" alignment="CENTER_LEFT">
+            <Label fx:id="playerNameLabel" styleClass="playerNameLabel"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="giveUpButton" onAction="#giveUp" text="Give Up" styleClass="giveUpButton"/>
+        </HBox>
+
+        <GridPane fx:id="ticTacToeGridPane" styleClass="ticTacToeGridPane"/>
+
+        <Region fx:id="blurOverlay" styleClass="blurOverlay" visible="false" managed="false"/>
+
+    </VBox>
 
     <VBox fx:id="gameWinnerAnnounce" styleClass="gameWinnerAnnounce" visible="false" managed="false">
-        <Label fx:id="gameWinner"/>
+        <Label fx:id="gameWinnerLabel" styleClass="gameWinnerLabel"/>
     </VBox>
 
 </StackPane>

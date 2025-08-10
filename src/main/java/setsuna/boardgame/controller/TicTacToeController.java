@@ -2,18 +2,40 @@ package setsuna.boardgame.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
+import setsuna.boardgame.GameApplication;
 import setsuna.boardgame.model.games.TicTacToe;
 import setsuna.boardgame.model.general.Pawn;
 import setsuna.boardgame.model.general.Player;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
 
+import java.io.IOException;
+import java.util.Optional;
+
 public class TicTacToeController{
     @FXML
     private StackPane rootPane;
+
+    @FXML
+    private VBox allContentVBox;
+
+    @FXML
+    private HBox annexeVBox;
+
+    @FXML
+    private Label playerNameLabel;
+
+    @FXML
+    private Button giveUpButton;
 
     @FXML
     private GridPane ticTacToeGridPane;
@@ -25,7 +47,7 @@ public class TicTacToeController{
     private VBox gameWinnerAnnounce;
 
     @FXML
-    private Label gameWinner;
+    private Label gameWinnerLabel;
 
     private TicTacToe game;
 
@@ -35,15 +57,29 @@ public class TicTacToeController{
         ticTacToeGridPane.maxWidthProperty().bind(rootPane.heightProperty().multiply(0.75));
         ticTacToeGridPane.maxHeightProperty().bind(rootPane.heightProperty().multiply(0.75));
 
-        //Fixe les marges
+        //Même longueur pour la ligne annexe d'information/bouton de retour
+        annexeVBox.maxWidthProperty().bind(rootPane.heightProperty().multiply(0.75));
+
+        //Fixe les marges entre les cases
         ticTacToeGridPane.hgapProperty().bind(ticTacToeGridPane.heightProperty().multiply(0.01));
         ticTacToeGridPane.vgapProperty().bind(ticTacToeGridPane.heightProperty().multiply(0.01));
     }
 
     //Créer la grille de jeu dynamiquement
-    public void setGridSize(int size){
+    public void createGameInterface(int size){
         game=new TicTacToe(size);
+
+        //Joueur courant
+        changeCurrentPlayerName();
+
+        //Plateau de jeu
         createBoard(size);
+    }
+
+    private void changeCurrentPlayerName(){
+        //TODO: changer quand il y aura des joueurs
+        //playerNameLabel.setText("Current player is "+game.getCurrentPlayer().getName());
+        playerNameLabel.setText("Current player is "+game.getTestName());
     }
 
     private void createBoard(int size){
@@ -89,12 +125,15 @@ public class TicTacToeController{
             clickedButton.setText(pawn.toString());
             clickedButton.getStyleClass().add(pawn.toString());
 
+            //Joueur courant
+            changeCurrentPlayerName();
+
             //Fin de jeu
             if(game.isGameOver()){
                 Player winner=game.getWinner();
                 showWinner();
-                if(winner==null) gameWinner.setText("Draw");
-                else gameWinner.setText("Winner is player "+winner.getName());
+                if(winner==null) gameWinnerLabel.setText("Draw");
+                else gameWinnerLabel.setText("Winner is player "+winner.getName());
             }
         }
         catch(InvalidMoveException e){}
@@ -102,12 +141,41 @@ public class TicTacToeController{
 
     public void showWinner(){
         //Effet de flou sur le jeu
-        ticTacToeGridPane.setEffect(new GaussianBlur(10));
+        allContentVBox.setEffect(new GaussianBlur(10));
         blurOverlay.setVisible(true);
         blurOverlay.setManaged(true);
 
         //Affiche le gagnant
         gameWinnerAnnounce.setVisible(true);
         gameWinnerAnnounce.setManaged(true);
+    }
+
+    @FXML
+    public void giveUp(ActionEvent actionEvent){
+        //Confirmation
+        Alert alert=new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Give up?");
+        ButtonType yesButton=new ButtonType("Yes");
+        ButtonType noButton=new ButtonType("No");
+        alert.getButtonTypes().setAll(yesButton, noButton);
+
+        //Réponse de l'utilisateur
+        Optional<ButtonType> result=alert.showAndWait();
+        if(result.isPresent() && result.get()==yesButton){
+            try{
+                //Scène à changer
+                Scene currentScene=((Node)actionEvent.getSource()).getScene();
+
+                //Scène à mettre
+                Parent newRoot=new FXMLLoader(GameApplication.class.getResource("MenuView/MenuView.fxml")).load();
+
+                //Changement de scène
+                currentScene.setRoot(newRoot);
+            }
+            catch(IOException e){
+                e.printStackTrace();
+            }
+        }
     }
 }

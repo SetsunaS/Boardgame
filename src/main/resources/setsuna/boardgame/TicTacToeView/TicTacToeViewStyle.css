@@ -51,6 +51,18 @@
     -fx-background-color: #e1ad6d;
 }
 
+.giveUpButton{
+    -fx-background-color: #ba5a1b;
+
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-font-color: #ffeaca;
+}
+
+.giveUpButton:hover{
+    -fx-background-color: #88453a;
+}
+
 
 .blurOverlay{
     /* Flou */
@@ -63,8 +75,14 @@
     -fx-spacing: 15.0
 }
 
-.label{
+.gameWinnerLabel{
     -fx-font-size: 50px;
+    -fx-font-weight: bold;
+    -fx-font-color: #ffeaca;
+}
+
+.playerNameLabel{
+    -fx-font-size: 18px;
     -fx-font-weight: bold;
     -fx-font-color: #ffeaca;
 }
