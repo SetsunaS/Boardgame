@@ -25,6 +25,7 @@
 
     <VBox fx:id="gameWinnerAnnounce" styleClass="gameWinnerAnnounce" visible="false" managed="false">
         <Label fx:id="gameWinnerLabel" styleClass="gameWinnerLabel"/>
+        <Button fx:id="goBackButton" onAction="#goBack" text="Go back to menu" styleClass="goBackButton"/>
     </VBox>
 
 </StackPane>

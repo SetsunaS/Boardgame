@@ -6,20 +6,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import setsuna.boardgame.GameApplication;
 import setsuna.boardgame.model.games.TicTacToe;
 import setsuna.boardgame.model.general.Pawn;
 import setsuna.boardgame.model.general.Player;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
+import setsuna.boardgame.utils.CustomAlert;
 
 import java.io.IOException;
-import java.util.Optional;
 
 public class TicTacToeController{
     @FXML
@@ -152,30 +152,46 @@ public class TicTacToeController{
 
     @FXML
     public void giveUp(ActionEvent actionEvent){
-        //Confirmation
-        Alert alert=new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirmation");
-        alert.setHeaderText("Give up?");
-        ButtonType yesButton=new ButtonType("Yes");
-        ButtonType noButton=new ButtonType("No");
-        alert.getButtonTypes().setAll(yesButton, noButton);
+        try{
+            //Fenêtre de demande de confirmation
+            FXMLLoader loader=new FXMLLoader(GameApplication.class.getResource("CustomAlertView.fxml"));
+            Parent root=loader.load();
 
-        //Réponse de l'utilisateur
-        Optional<ButtonType> result=alert.showAndWait();
-        if(result.isPresent() && result.get()==yesButton){
-            try{
-                //Scène à changer
-                Scene currentScene=((Node)actionEvent.getSource()).getScene();
+            CustomAlert controller=loader.getController();
+            controller.setText("Give up?");
 
-                //Scène à mettre
-                Parent newRoot=new FXMLLoader(GameApplication.class.getResource("MenuView/MenuView.fxml")).load();
+            Stage stage=new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL); //bloque l'accès à la fenêtre principale
+            stage.setTitle("Confirmation");
+            stage.setScene(new Scene(root));
+            stage.showAndWait(); //attend que la popup soit fermée
 
-                //Changement de scène
-                currentScene.setRoot(newRoot);
-            }
-            catch(IOException e){
-                e.printStackTrace();
-            }
+            if(controller.getResult()) changeSceneToMenu(actionEvent);
         }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void goBack(ActionEvent actionEvent){
+        changeSceneToMenu(actionEvent);
+    }
+
+    private void changeSceneToMenu(ActionEvent actionEvent){
+        try{
+            //Scène à changer
+            Scene currentScene=((Node)actionEvent.getSource()).getScene();
+
+            //Scène à mettre
+            Parent newRoot=new FXMLLoader(GameApplication.class.getResource("MenuView/MenuView.fxml")).load();
+
+            //Changement de scène
+            currentScene.setRoot(newRoot);
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+
     }
 }

@@ -9,11 +9,6 @@
 }
 
 
-.button:focused{
-    -fx-border-color: transparent, transparent;
-    -fx-background-insets: 0;
-}
-
 .gameButton{
     /* Police */
     -fx-font-weight: bold;
@@ -28,6 +23,12 @@
 
     /* Bordure */
     -fx-background-radius: 0px;
+}
+
+.button:focused{
+    /* Pas d'effet de focus */
+    -fx-border-color: transparent, transparent;
+    -fx-background-insets: 0;
 }
 
 .gameButton:hover{
@@ -52,15 +53,27 @@
 }
 
 .giveUpButton{
-    -fx-background-color: #ba5a1b;
+    -fx-background-color: e1ad6d;
 
     -fx-font-size: 18px;
     -fx-font-weight: bold;
-    -fx-font-color: #ffeaca;
+    -fx-text-fill: #88453a;
 }
 
 .giveUpButton:hover{
+    -fx-background-color: #ba5a1b;
+}
+
+.goBackButton{
     -fx-background-color: #88453a;
+
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e1ad6d;
+}
+
+.goBackButton:hover{
+    -fx-background-color: #ba5a1b;
 }
 
 
@@ -78,11 +91,11 @@
 .gameWinnerLabel{
     -fx-font-size: 50px;
     -fx-font-weight: bold;
-    -fx-font-color: #ffeaca;
+    -fx-text-fill: #88453a;
 }
 
 .playerNameLabel{
     -fx-font-size: 18px;
     -fx-font-weight: bold;
-    -fx-font-color: #ffeaca;
+    -fx-text-fill: #88453a;
 }

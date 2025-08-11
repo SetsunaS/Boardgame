@@ -1,0 +1,23 @@
+.customAlertPane{
+    -fx-background-color: #ffeaca;
+}
+
+.alertText{
+    -fx-text-fill: #88453a;
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+
+.alertButton{
+    -fx-background-color: #e1ad6d;
+
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #88453a;
+
+    -fx-background-radius: 5px;
+}
+
+.alertButton:hover{
+    -fx-background-color: #ba5a1b;
+}

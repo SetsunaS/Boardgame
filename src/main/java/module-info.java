@@ -3,11 +3,14 @@ module com.example.boardgame {
     requires javafx.fxml;
 
     opens setsuna.boardgame to javafx.fxml;
+    opens setsuna.boardgame.controller to javafx.fxml;
+    opens setsuna.boardgame.model.general to javafx.fxml;
+    opens setsuna.boardgame.model.general.exception to javafx.fxml;
+    opens setsuna.boardgame.utils to javafx.fxml;
+
     exports setsuna.boardgame;
     exports setsuna.boardgame.controller;
-    opens setsuna.boardgame.controller to javafx.fxml;
     exports setsuna.boardgame.model.general;
-    opens setsuna.boardgame.model.general to javafx.fxml;
     exports setsuna.boardgame.model.general.exception;
-    opens setsuna.boardgame.model.general.exception to javafx.fxml;
+    exports setsuna.boardgame.utils;
 }

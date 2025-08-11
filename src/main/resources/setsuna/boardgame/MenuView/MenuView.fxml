@@ -15,8 +15,8 @@
            stylesheets="@MenuViewStyle.css">
 
     <FlowPane fx:id="gameSelectionPane" styleClass="gameSelectionPane">
-        <Button fx:id="ticTacToeButton" onAction="#clickOnTicTacToeButton" text="Tic Tac Toe"/>
-        <Button fx:id="testButton" onAction="#clickOnTestButton" text="Test"/>
+        <Button fx:id="ticTacToeButton" onAction="#clickOnTicTacToeButton" styleClass="gameButton" text="Tic Tac Toe"/>
+        <Button fx:id="testButton" onAction="#clickOnTestButton" styleClass="gameButton" text="Test"/>
     </FlowPane>
 
     <Region fx:id="blurOverlay" styleClass="blurOverlay" visible="false" managed="false"/>
@@ -25,12 +25,12 @@
         <GridPane styleClass="gridPaneOutside">
             <TextField fx:id="gameSizeField" promptText="Game size" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
             <GridPane styleClass="gridPaneInside" GridPane.rowIndex="0" GridPane.columnIndex="1">
-                <Button fx:id="playWithAIButton" onAction="#playWithAIButton" styleClass="gameButton" text="Play VS AI" GridPane.rowIndex="0"/>
-                <Button fx:id="createRoomButton" onAction="#createRoom" styleClass="gameButton" text="Create room" GridPane.rowIndex="1"/>
+                <Button fx:id="playWithAIButton" onAction="#playWithAIButton" styleClass="createGameButton" text="Play VS AI" GridPane.rowIndex="0"/>
+                <Button fx:id="createRoomButton" onAction="#createRoom" styleClass="createGameButton" text="Create room" GridPane.rowIndex="1"/>
             </GridPane>
 
             <TextField fx:id="gameNumberField" promptText="Game number" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <Button fx:id="joinRoomButton" onAction="#joinRoom" styleClass="gameButton" text="Join room" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Button fx:id="joinRoomButton" onAction="#joinRoom" styleClass="createGameButton" text="Join room" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
         </GridPane>
 
         <Button fx:id="cancelButton" onAction="#hideGameConfiguration" styleClass="cancelButton" text="Cancel">
