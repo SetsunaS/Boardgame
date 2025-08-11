@@ -154,7 +154,7 @@ public class TicTacToeController{
     public void giveUp(ActionEvent actionEvent){
         try{
             //Fenêtre de demande de confirmation
-            FXMLLoader loader=new FXMLLoader(GameApplication.class.getResource("CustomAlertView.fxml"));
+            FXMLLoader loader=new FXMLLoader(GameApplication.class.getResource("utils/CustomAlertView.fxml"));
             Parent root=loader.load();
 
             CustomAlert controller=loader.getController();
