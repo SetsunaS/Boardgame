@@ -14,7 +14,7 @@
         <HBox fx:id="annexeVBox" alignment="CENTER_LEFT">
             <Label fx:id="playerNameLabel" styleClass="playerNameLabel"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="giveUpButton" onAction="#giveUp" text="Give Up" styleClass="giveUpButton"/>
+            <Button onAction="#giveUp" text="Give Up" styleClass="giveUpButton"/>
         </HBox>
 
         <GridPane fx:id="ticTacToeGridPane" styleClass="ticTacToeGridPane"/>

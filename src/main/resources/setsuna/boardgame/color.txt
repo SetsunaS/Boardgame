@@ -1,8 +1,10 @@
 clair
 
 #ffeaca;
+(#f2d49c;
 #e1ad6d;
 #ba5a1b;
 #88453a;
+#653422;
 
 foncé

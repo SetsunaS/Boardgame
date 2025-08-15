@@ -2,26 +2,19 @@ package setsuna.boardgame.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import setsuna.boardgame.GameApplication;
 import setsuna.boardgame.model.games.TicTacToe;
 import setsuna.boardgame.model.general.Pawn;
 import setsuna.boardgame.model.general.Player;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
 import setsuna.boardgame.utils.CustomAlert;
+import setsuna.boardgame.utils.ViewChanger;
 
-import java.io.IOException;
-
-public class TicTacToeController{
+public class TicTacToeController implements GameController{
     @FXML
     private StackPane rootPane;
 
@@ -33,9 +26,6 @@ public class TicTacToeController{
 
     @FXML
     private Label playerNameLabel;
-
-    @FXML
-    private Button giveUpButton;
 
     @FXML
     private GridPane ticTacToeGridPane;
@@ -50,6 +40,13 @@ public class TicTacToeController{
     private Label gameWinnerLabel;
 
     private TicTacToe game;
+
+    private Player currentPlayer;
+
+    @Override
+    public void setCurrentPlayer(Player player){
+        currentPlayer=player;
+    }
 
     @FXML
     private void initialize(){
@@ -153,45 +150,22 @@ public class TicTacToeController{
     @FXML
     public void giveUp(ActionEvent actionEvent){
         try{
-            //Fenêtre de demande de confirmation
-            FXMLLoader loader=new FXMLLoader(GameApplication.class.getResource("utils/CustomAlertView.fxml"));
-            Parent root=loader.load();
+            //Création et affichage de la pop-up de demande de confirmation
+            Stage newStage=new Stage();
+            CustomAlert customAlert=ViewChanger.createAlert("Confirmation", "Give up?", (Stage)rootPane.getScene().getWindow(), newStage);
 
-            CustomAlert controller=loader.getController();
-            controller.setText("Give up?");
-
-            Stage stage=new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL); //bloque l'accès à la fenêtre principale
-            stage.setTitle("Confirmation");
-            stage.setScene(new Scene(root));
-            stage.showAndWait(); //attend que la popup soit fermée
-
-            if(controller.getResult()) changeSceneToMenu(actionEvent);
+            //Attente d'une réponse et traitement
+            newStage.showAndWait(); //attend que la popup soit fermée
+            if(customAlert.getResult()) ViewChanger.changeSceneToMenu(actionEvent, currentPlayer);
         }
         catch(Exception e){
             e.printStackTrace();
+            System.out.println("Cannot create custom alert confirmation for give up.");
         }
     }
 
     @FXML
     public void goBack(ActionEvent actionEvent){
-        changeSceneToMenu(actionEvent);
-    }
-
-    private void changeSceneToMenu(ActionEvent actionEvent){
-        try{
-            //Scène à changer
-            Scene currentScene=((Node)actionEvent.getSource()).getScene();
-
-            //Scène à mettre
-            Parent newRoot=new FXMLLoader(GameApplication.class.getResource("MenuView/MenuView.fxml")).load();
-
-            //Changement de scène
-            currentScene.setRoot(newRoot);
-        }
-        catch(IOException e){
-            e.printStackTrace();
-        }
-
+        ViewChanger.changeSceneToMenu(actionEvent, currentPlayer);
     }
 }

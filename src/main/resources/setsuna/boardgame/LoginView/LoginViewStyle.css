@@ -1,0 +1,63 @@
+.tab-pane{
+    -fx-background-color: #ffeaca;
+}
+
+.tab-header-background{
+    -fx-background-color: #e1ad6d;
+}
+
+.tab{
+    -fx-background-color: #e1ad6d;
+    -fx-background-radius: 7 7 0 0;
+    -fx-padding: 8 20 8 20;
+    -fx-background-insets: 0 5 0 5;
+}
+
+.tab:hover{
+    -fx-background-color: #f2d49c;
+    -fx-background-radius: 7 7 7 7;
+    -fx-background-insets: 0 5 3 5;
+}
+
+.tab:selected{
+    -fx-background-color: #ffeaca;
+}
+
+.tab:selected:hover{
+    -fx-background-color: #ffeaca;
+    -fx-background-radius: 7 7 0 0;
+    -fx-padding: 8 20 8 20;
+    -fx-background-insets: 0 5 0 5;
+}
+
+.tab-label{
+    -fx-text-fill: #88453a;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+
+
+.label{
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #88453a;
+}
+
+.errorMessageLabel{
+    -fx-font-size: 18px;
+    -fx-font-style: italic;
+    -fx-text-fill: #921b30;
+}
+
+
+.button{
+    -fx-background-color: #e1ad6d;
+
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #88453a;
+}
+
+.button:hover{
+    -fx-background-color: #ba5a1b;
+}

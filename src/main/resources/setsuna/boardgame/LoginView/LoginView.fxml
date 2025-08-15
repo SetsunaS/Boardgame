@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21.0.3"
+      fx:controller="setsuna.boardgame.controller.LoginController"
+      stylesheets="@LoginViewStyle.css">
+
+    <TabPane tabClosingPolicy="UNAVAILABLE">
+        <Tab text="Login">
+            <VBox alignment="CENTER">
+                <GridPane alignment="center" hgap="5" vgap="15">
+                    <Label text="Username/e-mail:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="loginUsernameTextField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <PasswordField fx:id="loginPasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Button onAction="#login" text="Login" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER"/>
+                </GridPane>
+                <Label fx:id="loginErrorMessageLabel" visible="false" styleClass="errorMmessageLabel"/>
+            </VBox>
+        </Tab>
+
+        <Tab text="Register">
+            <VBox alignment="CENTER">
+                <GridPane alignment="center" hgap="5" vgap="15">
+                    <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="registerUsernameTextField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="E-mail:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="registerEmailTextField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Password:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <PasswordField fx:id="registerPasswordField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <Label text="Verify password:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <PasswordField fx:id="registerVerifyPasswordField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                    <Button onAction="#register" text="Register" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER"/>
+                </GridPane>
+                <Label fx:id="registerErrorMessageLabel" visible="false" styleClass="errorMessageLabel"/>
+            </VBox>
+        </Tab>
+    </TabPane>
+
+</StackPane>
