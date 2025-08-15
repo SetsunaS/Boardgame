@@ -1,4 +1,4 @@
-1. Login into postgreSQL in the shell
+1. Login into postgreSQL in the shell (for example : `psql -U postgre`)
 2. `CREATE DATABASE boargame`
 3.
 ```SQL

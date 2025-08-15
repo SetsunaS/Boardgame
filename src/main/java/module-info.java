@@ -1,6 +1,7 @@
 module com.example.boardgame {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.sql;
 
     opens setsuna.boardgame to javafx.fxml;
     opens setsuna.boardgame.controller to javafx.fxml;
