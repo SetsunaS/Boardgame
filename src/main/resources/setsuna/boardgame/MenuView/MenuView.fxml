@@ -40,7 +40,7 @@
         </Button>
     </VBox>
 
-    <Label fx:id="playerLabel" styleClass="playerLabel" text="Player score" StackPane.alignment="BOTTOM_LEFT">
+    <Label fx:id="playerLabel" styleClass="playerLabel" StackPane.alignment="BOTTOM_LEFT">
         <StackPane.margin>
             <Insets bottom="20" left="20"/>
         </StackPane.margin>

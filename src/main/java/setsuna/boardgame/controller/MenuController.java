@@ -8,6 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import setsuna.boardgame.ai.TicTacToeAiPlayer;
 import setsuna.boardgame.model.games.GamesEnum;
 import setsuna.boardgame.model.general.Player;
 import setsuna.boardgame.utils.CustomAlert;
@@ -30,7 +31,7 @@ public class MenuController implements GameController{
     private TextField gameNumberField; //TODO
 
     @FXML
-    private Label playerLabel; //TODO
+    private Label playerLabel;
 
     private GamesEnum selectedGame=null;
 
@@ -39,8 +40,8 @@ public class MenuController implements GameController{
     @Override
     public void setCurrentPlayer(Player player){
         currentPlayer=player;
+        playerLabel.setText(player.getName()+": "+player.getScore());
     }
-
 
     @FXML
     public void clickOnTicTacToeButton(ActionEvent actionEvent){
@@ -90,12 +91,15 @@ public class MenuController implements GameController{
         }
         catch(Exception e){}
 
+        //Créer la grille et ajoute les joueurs
         try{
-            ((TicTacToeController)loader.getController()).createGameInterface(size);
+            TicTacToeController controller=loader.getController();
+            controller.createGameInterface(size);
+            controller.addPlayer(new TicTacToeAiPlayer("AI"));
         }
         catch(Exception e){
             e.printStackTrace();
-            System.out.println("Impossible de créer le plateau de jeu Morpion");
+            System.out.println("Cannot create tic tac toe boardgame.");
         }
     }
 

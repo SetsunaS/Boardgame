@@ -11,6 +11,7 @@ import setsuna.boardgame.model.games.TicTacToe;
 import setsuna.boardgame.model.general.Pawn;
 import setsuna.boardgame.model.general.Player;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
+import setsuna.boardgame.model.general.exception.PlayerFullException;
 import setsuna.boardgame.utils.CustomAlert;
 import setsuna.boardgame.utils.ViewChanger;
 
@@ -65,6 +66,7 @@ public class TicTacToeController implements GameController{
     //Créer la grille de jeu dynamiquement
     public void createGameInterface(int size){
         game=new TicTacToe(size);
+        addPlayer(currentPlayer);
 
         //Joueur courant
         changeCurrentPlayerName();
@@ -73,10 +75,17 @@ public class TicTacToeController implements GameController{
         createBoard(size);
     }
 
+    public void addPlayer(Player player){
+        try{
+            game.addPlayer(player);
+        }
+        catch(PlayerFullException e){
+            System.out.println("Board game is full.");
+        }
+    }
+
     private void changeCurrentPlayerName(){
-        //TODO: changer quand il y aura des joueurs
-        //playerNameLabel.setText("Current player is "+game.getCurrentPlayer().getName());
-        playerNameLabel.setText("Current player is "+game.getTestName());
+        if(game.getCurrentPlayer()!=null) playerNameLabel.setText("Current player is "+game.getCurrentPlayer().getName());
     }
 
     private void createBoard(int size){
@@ -128,9 +137,11 @@ public class TicTacToeController implements GameController{
             //Fin de jeu
             if(game.isGameOver()){
                 Player winner=game.getWinner();
-                showWinner();
                 if(winner==null) gameWinnerLabel.setText("Draw");
-                else gameWinnerLabel.setText("Winner is player "+winner.getName());
+                else{
+                    gameWinnerLabel.setText("Winner is player "+winner.getName());
+                }
+                showWinner();
             }
         }
         catch(InvalidMoveException e){}

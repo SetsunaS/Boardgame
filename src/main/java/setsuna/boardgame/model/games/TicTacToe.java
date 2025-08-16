@@ -43,13 +43,6 @@ public class TicTacToe{
         return null;
     }
 
-    //TODO: effacer quand il y aura des joueurs
-     public String getTestName(){
-         if(currentPlayer==0) return "O";
-         if(currentPlayer==1) return "X";
-         return "";
-     }
-
     private void changeCurrentPlayer(){
         if(currentPlayer==0) currentPlayer=1;
         else if(currentPlayer==1) currentPlayer=0;
