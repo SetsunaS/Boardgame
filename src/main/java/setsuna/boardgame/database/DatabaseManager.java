@@ -216,4 +216,29 @@ public class DatabaseManager{
 
         return -1;
     }
+
+    public static boolean updatePlayerScore(String username, int score){
+        String query="UPDATE score SET score=? WHERE player_id=?";
+
+        try(Connection connection=DatabaseManager.getConnection();
+            PreparedStatement statement=connection.prepareStatement(query)){
+
+            int playerId=getPlayerId(username);
+            statement.setInt(1, score);
+            statement.setInt(2, playerId);
+
+            //Exécute la requête et vérifie s'il y a au moins un résultat
+            try(ResultSet resultSet=statement.executeQuery()){
+                if(resultSet.next()){
+                    return true;
+                }
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            System.out.println("Error while selecting player.");
+        }
+
+        return false;
+    }
 }

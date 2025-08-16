@@ -140,6 +140,7 @@ public class TicTacToeController implements GameController{
                 if(winner==null) gameWinnerLabel.setText("Draw");
                 else{
                     gameWinnerLabel.setText("Winner is player "+winner.getName());
+                    winner.addScore(10);
                 }
                 showWinner();
             }

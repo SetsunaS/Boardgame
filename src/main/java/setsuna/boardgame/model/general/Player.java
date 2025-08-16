@@ -1,5 +1,7 @@
 package setsuna.boardgame.model.general;
 
+import setsuna.boardgame.database.DatabaseManager;
+
 public class Player{
     private String name;
     private int score;
@@ -29,6 +31,7 @@ public class Player{
     /* Score */
     public void addScore(int scoreToAdd){
         this.score+=scoreToAdd;
+        DatabaseManager.updatePlayerScore(name, score);
     }
 
 
