@@ -1,4 +1,4 @@
-src/main/resources/setsuna/boardgame/Database/database.properties
+src/main/resources/setsuna/boardgame/annexes/Database/database.properties
 
 target/
 !.mvn/wrapper/maven-wrapper.jar

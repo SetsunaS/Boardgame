@@ -6,12 +6,12 @@ public class Player{
 
 
     /* Création d'un joueur */
-    Player(String name, int score){
+    public Player(String name, int score){
         this.name=name;
         this.score=score;
     }
 
-    Player(String name){
+    public Player(String name){
         this(name, 0);
     }
 
