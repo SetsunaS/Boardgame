@@ -228,11 +228,7 @@ public class DatabaseManager{
             statement.setInt(2, playerId);
 
             //Exécute la requête et vérifie s'il y a au moins un résultat
-            try(ResultSet resultSet=statement.executeQuery()){
-                if(resultSet.next()){
-                    return true;
-                }
-            }
+            if(statement.executeUpdate()>0) return true;
         }
         catch(SQLException e){
             e.printStackTrace();

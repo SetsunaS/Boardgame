@@ -35,6 +35,12 @@ public class Player{
     }
 
 
+    /* Jouer */
+    public Pawn play(){
+        return null;
+    }
+
+
     /* Affichage */
     public String toString(){
         return "Player "+name+" have "+score+" points";

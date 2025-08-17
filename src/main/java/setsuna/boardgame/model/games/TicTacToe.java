@@ -3,6 +3,7 @@ package setsuna.boardgame.model.games;
 import setsuna.boardgame.model.general.Board;
 import setsuna.boardgame.model.general.Pawn;
 import setsuna.boardgame.model.general.Player;
+import setsuna.boardgame.model.general.Position;
 import setsuna.boardgame.model.general.exception.PlayerFullException;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
 
@@ -11,6 +12,7 @@ public class TicTacToe{
     private final Board board;
 
     private int currentPlayer=0;
+    private Position lastPosition=new Position();
     private boolean isGameOver=false;
 
 
@@ -123,9 +125,14 @@ public class TicTacToe{
 
 
     /* Enchainement d'un tour */
+    public Board getBoard(){
+        return board;
+    }
+
     public Pawn play(int h, int w) throws InvalidMoveException{
         Pawn pawn=(currentPlayer==0)? Pawn.CIRCLE : Pawn.CROSS;
         oneMove(h, w, pawn);
+        lastPosition.setPosition(h, w);
 
         //Vérifie si une partie est finie ou non
         checkGameOver(h, w, pawn);
@@ -135,5 +142,17 @@ public class TicTacToe{
 
         //Retourne la pièce jouée
         return pawn;
+    }
+
+    public int getLastHPlayed(){
+        return lastPosition.getH();
+    }
+
+    public int getLastWPlayed(){
+        return lastPosition.getW();
+    }
+
+    public void resetLastPosition(){
+        lastPosition.reset();
     }
 }

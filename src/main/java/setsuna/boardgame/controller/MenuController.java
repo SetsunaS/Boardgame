@@ -81,6 +81,29 @@ public class MenuController implements GameController{
     }
 
     @FXML
+    public void playOnLocalButton(ActionEvent actionEvent){
+        FXMLLoader loader=ViewChanger.changeSceneToTicTacToe(actionEvent, currentPlayer);
+
+        //Initialiser la taille de la grille, par défaut à 3
+        int size=3;
+        try{
+            size=Integer.parseInt(gameSizeField.getText());
+        }
+        catch(Exception e){}
+
+        //Créer la grille et ajoute les joueurs
+        try{
+            TicTacToeController controller=loader.getController();
+            controller.createGameInterface(size);
+            controller.addPlayer(new Player("X"));
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            System.out.println("Cannot create tic tac toe boardgame.");
+        }
+    }
+
+    @FXML
     public void playWithAIButton(ActionEvent actionEvent){
         FXMLLoader loader=ViewChanger.changeSceneToTicTacToe(actionEvent, currentPlayer);
 
@@ -95,7 +118,7 @@ public class MenuController implements GameController{
         try{
             TicTacToeController controller=loader.getController();
             controller.createGameInterface(size);
-            controller.addPlayer(new TicTacToeAiPlayer("AI"));
+            controller.addPlayer(new TicTacToeAiPlayer("AI", controller.getGame()));
         }
         catch(Exception e){
             e.printStackTrace();

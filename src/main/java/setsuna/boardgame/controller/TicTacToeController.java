@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import setsuna.boardgame.ai.TicTacToeAiPlayer;
 import setsuna.boardgame.model.games.TicTacToe;
 import setsuna.boardgame.model.general.Pawn;
 import setsuna.boardgame.model.general.Player;
@@ -47,6 +48,10 @@ public class TicTacToeController implements GameController{
     @Override
     public void setCurrentPlayer(Player player){
         currentPlayer=player;
+    }
+
+    public TicTacToe getGame(){
+        return game;
     }
 
     @FXML
@@ -118,9 +123,8 @@ public class TicTacToeController implements GameController{
 
     @FXML
     public void onGridButtonClick(ActionEvent actionEvent){
-        Button clickedButton=(Button)actionEvent.getSource();
-
         //Extraction du numéro de bouton au format buttonRowCol
+        Button clickedButton=(Button)actionEvent.getSource();
         String buttonID=clickedButton.getId();
         int h=Character.getNumericValue(buttonID.charAt(6));
         int w=Character.getNumericValue(buttonID.charAt(7));
@@ -128,24 +132,40 @@ public class TicTacToeController implements GameController{
         try{
             //Ajout du pion joué
             Pawn pawn=game.play(h, w);
-            clickedButton.setText(pawn.toString());
-            clickedButton.getStyleClass().add(pawn.toString());
+            updateButton(clickedButton, pawn);
+            updatePlayer();
 
-            //Joueur courant
-            changeCurrentPlayerName();
-
-            //Fin de jeu
-            if(game.isGameOver()){
-                Player winner=game.getWinner();
-                if(winner==null) gameWinnerLabel.setText("Draw");
-                else{
-                    gameWinnerLabel.setText("Winner is player "+winner.getName());
-                    winner.addScore(10);
-                }
-                showWinner();
+            //Si l'adversaire est une ia
+            if(game.getCurrentPlayer() instanceof TicTacToeAiPlayer){
+                pawn=game.getCurrentPlayer().play();
+                clickedButton=(Button)rootPane.lookup("#button"+game.getLastHPlayed()+game.getLastWPlayed());
+                updateButton(clickedButton, pawn);
+                game.resetLastPosition();
+                updatePlayer();
             }
         }
         catch(InvalidMoveException e){}
+    }
+
+    private void updateButton(Button button, Pawn pawn){
+        button.setText(pawn.toString());
+        button.getStyleClass().add(pawn.toString());
+    }
+
+    private void updatePlayer(){
+        //Joueur courant
+        changeCurrentPlayerName();
+
+        //Fin de jeu
+        if(game.isGameOver()){
+            Player winner=game.getWinner();
+            if(winner==null) gameWinnerLabel.setText("Draw");
+            else{
+                gameWinnerLabel.setText("Winner is player "+winner.getName());
+                winner.addScore(10);
+            }
+            showWinner();
+        }
     }
 
     public void showWinner(){
