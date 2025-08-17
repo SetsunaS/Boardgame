@@ -8,9 +8,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import setsuna.boardgame.ai.TicTacToeAiPlayer;
+import setsuna.boardgame.model.general.player.HumanPlayer;
+import setsuna.boardgame.model.general.player.Player;
+import setsuna.boardgame.model.general.player.ai.TicTacToeAiPlayer;
 import setsuna.boardgame.model.games.GamesEnum;
-import setsuna.boardgame.model.general.Player;
 import setsuna.boardgame.utils.CustomAlert;
 import setsuna.boardgame.utils.ViewChanger;
 
@@ -82,47 +83,19 @@ public class MenuController implements GameController{
 
     @FXML
     public void playOnLocalButton(ActionEvent actionEvent){
-        FXMLLoader loader=ViewChanger.changeSceneToTicTacToe(actionEvent, currentPlayer);
-
-        //Initialiser la taille de la grille, par défaut à 3
-        int size=3;
-        try{
-            size=Integer.parseInt(gameSizeField.getText());
-        }
-        catch(Exception e){}
-
-        //Créer la grille et ajoute les joueurs
-        try{
-            TicTacToeController controller=loader.getController();
-            controller.createGameInterface(size);
-            controller.addPlayer(new Player("X"));
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            System.out.println("Cannot create tic tac toe boardgame.");
+        FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer);
+        switch(selectedGame){
+            case TicTacToe -> createTicTacToe(actionEvent, loader, new HumanPlayer("X"));
+            case Test -> {}
         }
     }
 
     @FXML
     public void playWithAIButton(ActionEvent actionEvent){
-        FXMLLoader loader=ViewChanger.changeSceneToTicTacToe(actionEvent, currentPlayer);
-
-        //Initialiser la taille de la grille, par défaut à 3
-        int size=3;
-        try{
-            size=Integer.parseInt(gameSizeField.getText());
-        }
-        catch(Exception e){}
-
-        //Créer la grille et ajoute les joueurs
-        try{
-            TicTacToeController controller=loader.getController();
-            controller.createGameInterface(size);
-            controller.addPlayer(new TicTacToeAiPlayer("AI", controller.getGame()));
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            System.out.println("Cannot create tic tac toe boardgame.");
+        FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer);
+        switch(selectedGame){
+            case TicTacToe -> createTicTacToe(actionEvent, loader, new TicTacToeAiPlayer("AI"));
+            case Test -> {}
         }
     }
 
@@ -134,6 +107,28 @@ public class MenuController implements GameController{
     @FXML
     public void joinRoomButton(ActionEvent actionEvent){
         //TODO
+    }
+
+    private void createTicTacToe(ActionEvent actionEvent, FXMLLoader loader, Player secondPlayer){
+        //Initialiser la taille de la grille, par défaut à 3
+        int size=3;
+        try{
+            size=Integer.parseInt(gameSizeField.getText());
+        }
+        catch(Exception e){}
+
+        //Créer la grille et ajoute les joueurs
+        try{
+            TicTacToeController controller=loader.getController();
+            controller.createGameInterface(size);
+
+            controller.addPlayer(secondPlayer);
+            secondPlayer.setGame(controller.getGame());
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            System.out.println("Cannot create tic tac toe boardgame.");
+        }
     }
 
     @FXML

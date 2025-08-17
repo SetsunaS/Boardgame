@@ -6,7 +6,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import setsuna.boardgame.database.DatabaseManager;
-import setsuna.boardgame.model.general.Player;
+import setsuna.boardgame.model.general.player.HumanPlayer;
+import setsuna.boardgame.model.general.player.Player;
 import setsuna.boardgame.utils.Constants;
 import setsuna.boardgame.utils.ViewChanger;
 import setsuna.boardgame.utils.password.PasswordCrypt;
@@ -73,7 +74,7 @@ public class LoginController implements GameController{
                 }
                 else{
                     //Création du Player
-                    setCurrentPlayer(new Player(username, DatabaseManager.getScore(username)));
+                    setCurrentPlayer(new HumanPlayer(username, DatabaseManager.getScore(username)));
 
                     //Changement de scène pour aller au menu des jeux
                     ViewChanger.changeSceneToMenu(actionEvent, currentPlayer);
@@ -106,7 +107,7 @@ public class LoginController implements GameController{
                     if(DatabaseManager.insertNewPlayer(registerUsernameTextField.getText(), registerEmailTextField.getText(), PasswordCrypt.hashPassword(registerPasswordField.getText()))
                     && DatabaseManager.insertNewScore(registerUsernameTextField.getText())){
                         //Création du Player
-                        setCurrentPlayer(new Player(registerUsernameTextField.getText()));
+                        setCurrentPlayer(new HumanPlayer(registerUsernameTextField.getText()));
 
                         //Changement de scène pour aller au menu des jeux
                         ViewChanger.changeSceneToMenu(actionEvent, currentPlayer);

@@ -21,4 +21,6 @@ module setsuna.boardgame{
     exports setsuna.boardgame.model.general.exception;
     exports setsuna.boardgame.utils;
     exports setsuna.boardgame.utils.password;
+    exports setsuna.boardgame.model.general.player;
+    opens setsuna.boardgame.model.general.player to javafx.fxml;
 }

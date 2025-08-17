@@ -7,10 +7,10 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import setsuna.boardgame.ai.TicTacToeAiPlayer;
+import setsuna.boardgame.model.general.player.Player;
+import setsuna.boardgame.model.general.player.ai.TicTacToeAiPlayer;
 import setsuna.boardgame.model.games.TicTacToe;
 import setsuna.boardgame.model.general.Pawn;
-import setsuna.boardgame.model.general.Player;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
 import setsuna.boardgame.model.general.exception.PlayerFullException;
 import setsuna.boardgame.utils.CustomAlert;
@@ -138,9 +138,11 @@ public class TicTacToeController implements GameController{
             //Si l'adversaire est une ia
             if(game.getCurrentPlayer() instanceof TicTacToeAiPlayer){
                 pawn=game.getCurrentPlayer().play();
+
                 clickedButton=(Button)rootPane.lookup("#button"+game.getLastHPlayed()+game.getLastWPlayed());
                 updateButton(clickedButton, pawn);
                 game.resetLastPosition();
+
                 updatePlayer();
             }
         }

@@ -9,7 +9,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import setsuna.boardgame.GameApplication;
 import setsuna.boardgame.controller.GameController;
-import setsuna.boardgame.model.general.Player;
+import setsuna.boardgame.model.games.GamesEnum;
+import setsuna.boardgame.model.general.player.Player;
 
 import java.io.IOException;
 
@@ -55,12 +56,15 @@ public class ViewChanger{
         return changeScene(actionEvent, Constants.menuViewPath, player);
     }
 
-    public static FXMLLoader changeSceneToTicTacToe(ActionEvent actionEvent, Player player){
-        return changeScene(actionEvent, Constants.ticTacToeViewPath, player);
-    }
-
     public static FXMLLoader changeSceneToLogin(ActionEvent actionEvent, Player player){
         return changeScene(actionEvent, Constants.loginViewPath, player);
+    }
+
+    public static FXMLLoader changeSceneToGame(ActionEvent actionEvent, GamesEnum gameNumber, Player player){
+        return switch(gameNumber){
+            case TicTacToe -> changeScene(actionEvent, Constants.ticTacToeViewPath, player);
+            case Test -> null;
+        };
     }
 
 
