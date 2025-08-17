@@ -2,14 +2,14 @@ package setsuna.boardgame.model.games;
 
 import setsuna.boardgame.model.general.Board;
 import setsuna.boardgame.model.general.Pawn;
-import setsuna.boardgame.model.general.Player;
 import setsuna.boardgame.model.general.Position;
 import setsuna.boardgame.model.general.exception.PlayerFullException;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
+import setsuna.boardgame.model.general.player.Player;
 
-public class TicTacToe{
+public class TicTacToe implements Cloneable{
     private Player[] players=new Player[2];
-    private final Board board;
+    private Board board;
 
     private int currentPlayer=0;
     private Position lastPosition=new Position();
@@ -125,10 +125,6 @@ public class TicTacToe{
 
 
     /* Enchainement d'un tour */
-    public Board getBoard(){
-        return board;
-    }
-
     public Pawn play(int h, int w) throws InvalidMoveException{
         Pawn pawn=(currentPlayer==0)? Pawn.CIRCLE : Pawn.CROSS;
         oneMove(h, w, pawn);
@@ -154,5 +150,32 @@ public class TicTacToe{
 
     public void resetLastPosition(){
         lastPosition.reset();
+    }
+
+
+    /* Simulation d'un tour */
+    @Override
+    public Object clone(){
+        try{
+            //Copie superficielle
+            TicTacToe clone=(TicTacToe)super.clone();
+
+            //Copie en profondeur des objets qu'il ne faut pas modifier dans la version originale
+            clone.board=new Board(board);
+            lastPosition=new Position();
+            return clone;
+        }
+        catch(CloneNotSupportedException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public int getBoardSize(){
+        return board.getSize();
+    }
+
+    public boolean isValidMove(int h, int w){
+        return board.isEmpty(h, w);
     }
 }

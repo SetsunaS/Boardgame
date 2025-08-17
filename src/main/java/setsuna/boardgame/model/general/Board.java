@@ -5,7 +5,7 @@ public class Board{
 
 
     /* Création de plateau */
-    public Board(int height, int width){
+    private Board(int height, int width){
         board=new Pawn[height][width];
         for(int h=0; h<height; h++)
             for(int w=0; w<width; w++)
@@ -14,6 +14,16 @@ public class Board{
 
     public Board(int size){
         this(size, size);
+    }
+
+
+    /* Copie */
+    public Board(Board boardToCopy){
+        int size=boardToCopy.getSize();
+        board=new Pawn[size][size];
+        for(int h=0; h<size; h++)
+            for(int w=0; w<size; w++)
+                board[h][w]=boardToCopy.board[h][w];
     }
 
 
