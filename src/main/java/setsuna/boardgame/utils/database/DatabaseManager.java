@@ -1,4 +1,4 @@
-package setsuna.boardgame.database;
+package setsuna.boardgame.utils.database;
 
 import setsuna.boardgame.GameApplication;
 import setsuna.boardgame.utils.Constants;
@@ -10,7 +10,7 @@ public class DatabaseManager{
     private static Connection getConnection(){
         Properties properties=new Properties();
         try{
-            properties.load(GameApplication.class.getResourceAsStream(Constants.databasePropertiesPath));
+            properties.load(GameApplication.class.getResourceAsStream(Constants.DATABASE_PROPERTIES_PATH));
             String url=properties.getProperty("database.url");
             String username=properties.getProperty("database.username");
             String password=properties.getProperty("database.password");

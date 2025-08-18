@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import setsuna.boardgame.controller.network.NetworkManager;
 import setsuna.boardgame.model.general.player.Player;
 import setsuna.boardgame.model.general.player.ai.TicTacToeAiPlayer;
 import setsuna.boardgame.model.games.TicTacToe;
@@ -16,6 +17,9 @@ import setsuna.boardgame.model.general.exception.PlayerFullException;
 import setsuna.boardgame.utils.CustomAlert;
 import setsuna.boardgame.utils.ViewChanger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TicTacToeController implements GameController{
     @FXML
     private StackPane rootPane;
@@ -24,7 +28,7 @@ public class TicTacToeController implements GameController{
     private VBox allContentVBox;
 
     @FXML
-    private HBox annexeVBox;
+    private HBox headerInformation;
 
     @FXML
     private Label playerNameLabel;
@@ -36,18 +40,36 @@ public class TicTacToeController implements GameController{
     private Region blurOverlay;
 
     @FXML
+    private HBox footerInformation;
+
+    @FXML
+    private Label roomIdLabel;
+
+    @FXML
     private VBox gameWinnerAnnounce;
 
     @FXML
     private Label gameWinnerLabel;
 
-    private TicTacToe game;
-
+    private boolean isOnline;
     private Player currentPlayer;
+    private TicTacToe game;
+    private int roomId;
+    private List<Button> buttons=new ArrayList<>();
+    private NetworkManager networkManager;
 
     @Override
     public void setCurrentPlayer(Player player){
         currentPlayer=player;
+    }
+
+    @Override
+    public void setNetworkManager(NetworkManager networkManager){
+        this.networkManager=networkManager;
+    }
+
+    public void setRoomId(int roomId){
+        this.roomId=roomId;
     }
 
     public TicTacToe getGame(){
@@ -60,8 +82,9 @@ public class TicTacToeController implements GameController{
         ticTacToeGridPane.maxWidthProperty().bind(rootPane.heightProperty().multiply(0.75));
         ticTacToeGridPane.maxHeightProperty().bind(rootPane.heightProperty().multiply(0.75));
 
-        //Même longueur pour la ligne annexe d'information/bouton de retour
-        annexeVBox.maxWidthProperty().bind(rootPane.heightProperty().multiply(0.75));
+        //Même longueur pour les lignes d'informations
+        headerInformation.maxWidthProperty().bind(rootPane.heightProperty().multiply(0.75));
+        footerInformation.maxWidthProperty().bind(rootPane.heightProperty().multiply(0.75));
 
         //Fixe les marges entre les cases
         ticTacToeGridPane.hgapProperty().bind(ticTacToeGridPane.heightProperty().multiply(0.01));
@@ -69,15 +92,20 @@ public class TicTacToeController implements GameController{
     }
 
     //Créer la grille de jeu dynamiquement
-    public void createGameInterface(int size){
-        game=new TicTacToe(size);
-        addPlayer(currentPlayer);
+    public void createGameInterface(int size, boolean isOnline){
+        this.isOnline=isOnline;
 
-        //Joueur courant
+        //Gestion du model dans le controller si jeu en local
+        if(!isOnline){
+            this.game=new TicTacToe(size);
+            addPlayer(currentPlayer);
+        }
+
+        //Affichage du joueur courant
         changeCurrentPlayerName();
 
-        //Plateau de jeu
-        createBoard(size);
+        //Création du plateau de jeu
+        createBoard(game.getBoardSize());
     }
 
     public void addPlayer(Player player){
@@ -91,6 +119,10 @@ public class TicTacToeController implements GameController{
 
     private void changeCurrentPlayerName(){
         if(game.getCurrentPlayer()!=null) playerNameLabel.setText("Current player is "+game.getCurrentPlayer().getName());
+        else if(isOnline){
+            networkManager.sendMessageToServer("GET_PLAYER_NAME "+roomId);
+            playerNameLabel.setText("Current player is "+"");
+        }
     }
 
     private void createBoard(int size){
@@ -117,41 +149,59 @@ public class TicTacToeController implements GameController{
                 button.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
                 ticTacToeGridPane.add(button, col, row);
+                buttons.add(button);
             }
         }
     }
 
+    private void disableButtons(){
+        for(Button button: buttons) button.setDisable(true);
+    }
+
+    private void enableButtons(){
+        for(Button button: buttons) button.setDisable(false);
+    }
+
     @FXML
     public void onGridButtonClick(ActionEvent actionEvent){
+        disableButtons();
+
         //Extraction du numéro de bouton au format buttonRowCol
         Button clickedButton=(Button)actionEvent.getSource();
         String buttonID=clickedButton.getId();
         int h=Character.getNumericValue(buttonID.charAt(6));
         int w=Character.getNumericValue(buttonID.charAt(7));
 
-        try{
-            //Ajout du pion joué
-            Pawn pawn=game.play(h, w);
-            updateButton(clickedButton, pawn);
-            updatePlayer();
-
-            //Si l'adversaire est une ia
-            if(game.getCurrentPlayer() instanceof TicTacToeAiPlayer){
-                pawn=game.getCurrentPlayer().play();
-
-                clickedButton=(Button)rootPane.lookup("#button"+game.getLastHPlayed()+game.getLastWPlayed());
-                updateButton(clickedButton, pawn);
-                game.resetLastPosition();
-
-                updatePlayer();
-            }
+        if(isOnline){
+            //TODO: Envoie de message au serveur
+            //TODO: Attente de réponse
         }
-        catch(InvalidMoveException e){}
+        else{
+            try{
+                //Ajout du pion joué
+                Pawn pawn=game.play(h, w);
+                updateButton(clickedButton, pawn);
+                updatePlayer();
+
+                //Si l'adversaire est une ia
+                if(game.getCurrentPlayer() instanceof TicTacToeAiPlayer){
+                    pawn=game.getCurrentPlayer().play();
+
+                    clickedButton=(Button)rootPane.lookup("#button"+game.getLastHPlayed()+game.getLastWPlayed());
+                    updateButton(clickedButton, pawn);
+                    game.resetLastPosition();
+
+                    updatePlayer();
+                }
+            }
+            catch(InvalidMoveException e){}
+        }
     }
 
     private void updateButton(Button button, Pawn pawn){
         button.setText(pawn.toString());
         button.getStyleClass().add(pawn.toString());
+        enableButtons();
     }
 
     private void updatePlayer(){
@@ -190,7 +240,10 @@ public class TicTacToeController implements GameController{
 
             //Attente d'une réponse et traitement
             newStage.showAndWait(); //attend que la popup soit fermée
-            if(customAlert.getResult()) ViewChanger.changeSceneToMenu(actionEvent, currentPlayer);
+            if(customAlert.getResult()){
+                ViewChanger.changeSceneToMenu(actionEvent, currentPlayer, networkManager);
+                game.removePlayer(currentPlayer);
+            }
         }
         catch(Exception e){
             e.printStackTrace();
@@ -200,6 +253,7 @@ public class TicTacToeController implements GameController{
 
     @FXML
     public void goBack(ActionEvent actionEvent){
-        ViewChanger.changeSceneToMenu(actionEvent, currentPlayer);
+        ViewChanger.changeSceneToMenu(actionEvent, currentPlayer, networkManager);
+        game.removePlayer(currentPlayer);
     }
 }

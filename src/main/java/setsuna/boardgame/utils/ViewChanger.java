@@ -9,6 +9,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import setsuna.boardgame.GameApplication;
 import setsuna.boardgame.controller.GameController;
+import setsuna.boardgame.controller.network.NetworkManager;
 import setsuna.boardgame.model.games.GamesEnum;
 import setsuna.boardgame.model.general.player.Player;
 
@@ -23,12 +24,12 @@ public class ViewChanger{
     }
 
     public static Scene createLoginScene() throws IOException{
-        return creatScene(Constants.loginViewPath);
+        return creatScene(Constants.LOGIN_VIEW_PATH);
     }
 
 
     //Change le contenu de la fenêtre actuelle en mettant le nouveau contenu
-    private static FXMLLoader changeScene(ActionEvent actionEvent, String newPath, Player player){
+    private static FXMLLoader changeScene(ActionEvent actionEvent, String newPath, Player player, NetworkManager networkManager){
         try{
             //Scène à changer
             Scene currentScene=((Node)actionEvent.getSource()).getScene();
@@ -41,6 +42,7 @@ public class ViewChanger{
 
             GameController gameController=loader.getController();
             gameController.setCurrentPlayer(player);
+            gameController.setNetworkManager(networkManager);
 
             return loader;
         }
@@ -52,17 +54,17 @@ public class ViewChanger{
         return null;
     }
 
-    public static FXMLLoader changeSceneToMenu(ActionEvent actionEvent, Player player){
-        return changeScene(actionEvent, Constants.menuViewPath, player);
+    public static FXMLLoader changeSceneToMenu(ActionEvent actionEvent, Player player, NetworkManager networkManager){
+        return changeScene(actionEvent, Constants.MENU_VIEW_PATH, player, networkManager);
     }
 
-    public static FXMLLoader changeSceneToLogin(ActionEvent actionEvent, Player player){
-        return changeScene(actionEvent, Constants.loginViewPath, player);
+    public static FXMLLoader changeSceneToLogin(ActionEvent actionEvent, Player player, NetworkManager networkManager){
+        return changeScene(actionEvent, Constants.LOGIN_VIEW_PATH, player, networkManager);
     }
 
-    public static FXMLLoader changeSceneToGame(ActionEvent actionEvent, GamesEnum gameNumber, Player player){
+    public static FXMLLoader changeSceneToGame(ActionEvent actionEvent, GamesEnum gameNumber, Player player, NetworkManager networkManager){
         return switch(gameNumber){
-            case TicTacToe -> changeScene(actionEvent, Constants.ticTacToeViewPath, player);
+            case TicTacToe -> changeScene(actionEvent, Constants.TIC_TAC_TOE_VIEW_PATH, player, networkManager);
             case Test -> null;
         };
     }
@@ -71,7 +73,7 @@ public class ViewChanger{
     //Création et affichage d'une fenêtre d'alerte
     public static CustomAlert createAlert(String titleText, String contentText, Stage parentStage, Stage newStage) throws IOException{
         //Pop-up de demande de confirmation
-        FXMLLoader loader=new FXMLLoader(GameApplication.class.getResource(Constants.customAlertViewPath));
+        FXMLLoader loader=new FXMLLoader(GameApplication.class.getResource(Constants.CUSTOM_ALERT_VIEW_PATH));
         Parent root=loader.load();
         CustomAlert customAlert=loader.getController();
 

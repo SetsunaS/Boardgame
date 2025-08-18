@@ -12,23 +12,23 @@
       fx:controller="setsuna.boardgame.controller.LoginController"
       stylesheets="@LoginViewStyle.css">
 
-    <TabPane tabClosingPolicy="UNAVAILABLE">
-        <Tab text="Login">
+    <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+        <Tab fx:id="loginTab" text="Login">
             <VBox alignment="CENTER">
                 <GridPane alignment="center" hgap="5" vgap="15">
                     <Label text="Username/e-mail:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <TextField fx:id="loginUsernameTextField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <TextField fx:id="loginUsernameTextField" text="admin" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
                     <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                    <PasswordField fx:id="loginPasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <PasswordField fx:id="loginPasswordField" text="Admin01" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                    <Button onAction="#login" text="Login" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER"/>
+                    <Button fx:id="loginButton" onAction="#login" text="Login" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER"/>
                 </GridPane>
                 <Label fx:id="loginErrorMessageLabel" visible="false" styleClass="errorMmessageLabel"/>
             </VBox>
         </Tab>
 
-        <Tab text="Register">
+        <Tab fx:id="registerTab" text="Register">
             <VBox alignment="CENTER">
                 <GridPane alignment="center" hgap="5" vgap="15">
                     <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
@@ -43,7 +43,7 @@
                     <Label text="Verify password:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
                     <PasswordField fx:id="registerVerifyPasswordField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-                    <Button onAction="#register" text="Register" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER"/>
+                    <Button fx:id="registerButton" onAction="#register" text="Register" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER"/>
                 </GridPane>
                 <Label fx:id="registerErrorMessageLabel" visible="false" styleClass="errorMessageLabel"/>
             </VBox>

@@ -11,13 +11,17 @@
 
     <VBox fx:id="allContentVBox" alignment="CENTER" spacing="9.0">
 
-        <HBox fx:id="annexeVBox" alignment="CENTER_LEFT">
-            <Label fx:id="playerNameLabel" styleClass="playerNameLabel"/>
+        <HBox fx:id="headerInformation" alignment="CENTER_LEFT">
+            <Label fx:id="playerNameLabel" styleClass="infoLabel"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button onAction="#giveUp" text="Give Up" styleClass="giveUpButton"/>
         </HBox>
 
         <GridPane fx:id="ticTacToeGridPane" styleClass="ticTacToeGridPane"/>
+
+        <HBox fx:id="footerInformation" alignment="CENTER_LEFT">
+            <Label fx:id="roomIdLabel" styleClass="infoLabel"/>
+        </HBox>
 
         <Region fx:id="blurOverlay" styleClass="blurOverlay" visible="false" managed="false"/>
 

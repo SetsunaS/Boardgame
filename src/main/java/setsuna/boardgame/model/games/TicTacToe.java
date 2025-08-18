@@ -7,7 +7,7 @@ import setsuna.boardgame.model.general.exception.PlayerFullException;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
 import setsuna.boardgame.model.general.player.Player;
 
-public class TicTacToe implements Cloneable{
+public class TicTacToe implements GameModel, Cloneable{
     private Player[] players=new Player[2];
     private Board board;
 
@@ -35,6 +35,23 @@ public class TicTacToe implements Cloneable{
         if(players[0]==null) players[0]=player;
         else if(players[1]==null) players[1]=player;
         else throw new PlayerFullException();
+    }
+
+    public boolean removePlayer(Player player){
+        if(players[0]==player){
+            players[0]=null;
+            return true;
+        }
+        if(players[1]==player){
+            players[1]=null;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canBeClose(){
+        return isGameOver && players[0]==null && players[1]==null;
     }
 
 
