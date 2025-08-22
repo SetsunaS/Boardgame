@@ -33,6 +33,7 @@
             <TextField fx:id="gameNumberField" promptText="Game number" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
             <Button onAction="#joinRoomButton" styleClass="createGameButton" text="Join room" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
         </GridPane>
+        <Label fx:id="joinErrorMessageLabel" styleClass="errorMessageLabel" visible="false"/>
 
         <Button onAction="#hideGameConfiguration" styleClass="cancelButton" text="Cancel">
             <VBox.margin>

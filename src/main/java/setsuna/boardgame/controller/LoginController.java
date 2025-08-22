@@ -3,18 +3,17 @@ package setsuna.boardgame.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import setsuna.boardgame.controller.network.NetworkManager;
+import setsuna.boardgame.utils.network.NetworkManager;
 import setsuna.boardgame.utils.database.DatabaseManager;
 import setsuna.boardgame.model.general.player.HumanPlayer;
 import setsuna.boardgame.model.general.player.Player;
 import setsuna.boardgame.utils.Constants;
 import setsuna.boardgame.utils.ViewChanger;
 import setsuna.boardgame.utils.password.PasswordCrypt;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LoginController implements GameController{
+public class LoginController implements ControllerInterface{
     @FXML
     private TabPane tabPane;
 

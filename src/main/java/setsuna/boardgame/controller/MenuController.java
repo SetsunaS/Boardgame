@@ -8,15 +8,18 @@ import javafx.scene.control.TextField;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import setsuna.boardgame.controller.network.NetworkManager;
+import setsuna.boardgame.utils.Constants;
+import setsuna.boardgame.utils.network.Commands;
+import setsuna.boardgame.utils.network.NetworkManager;
 import setsuna.boardgame.model.general.player.HumanPlayer;
 import setsuna.boardgame.model.general.player.Player;
 import setsuna.boardgame.model.general.player.ai.TicTacToeAiPlayer;
-import setsuna.boardgame.model.games.GamesEnum;
+import setsuna.boardgame.model.games.Games;
 import setsuna.boardgame.utils.CustomAlert;
 import setsuna.boardgame.utils.ViewChanger;
+import java.util.List;
 
-public class MenuController implements GameController{
+public class MenuController implements ControllerInterface{
     @FXML
     private FlowPane gameSelectionPane;
 
@@ -33,10 +36,13 @@ public class MenuController implements GameController{
     private TextField gameNumberField;
 
     @FXML
+    private Label joinErrorMessageLabel;
+
+    @FXML
     private Label playerLabel;
 
     private Player currentPlayer;
-    private GamesEnum selectedGame=null;
+    private Games selectedGame=null;
     private NetworkManager networkManager;
 
 
@@ -53,13 +59,13 @@ public class MenuController implements GameController{
 
     @FXML
     public void clickOnTicTacToeButton(ActionEvent actionEvent){
-        selectedGame=GamesEnum.TicTacToe;
+        selectedGame=Games.TIC_TAC_TOE;
         showGameConfiguration();
     }
 
     @FXML
     public void clickOnTestButton(ActionEvent actionEvent){
-        selectedGame=GamesEnum.Test;
+        selectedGame=Games.TEST;
         showGameConfiguration();
     }
 
@@ -92,8 +98,8 @@ public class MenuController implements GameController{
     public void playOnLocalButton(ActionEvent actionEvent){
         FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
         switch(selectedGame){
-            case TicTacToe -> createLocalTicTacToe(actionEvent, loader, new HumanPlayer("X"));
-            case Test -> {}
+            case TIC_TAC_TOE -> createLocalTicTacToe(actionEvent, loader, new HumanPlayer("X"));
+            case TEST -> {}
         }
     }
 
@@ -101,26 +107,24 @@ public class MenuController implements GameController{
     public void playWithAIButton(ActionEvent actionEvent){
         FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
         switch(selectedGame){
-            case TicTacToe -> createLocalTicTacToe(actionEvent, loader, new TicTacToeAiPlayer("AI"));
-            case Test -> {}
+            case TIC_TAC_TOE -> createLocalTicTacToe(actionEvent, loader, new TicTacToeAiPlayer("AI"));
+            case TEST -> {}
         }
     }
 
     @FXML
     public void createRoomButton(ActionEvent actionEvent){
-        FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
         switch(selectedGame){
-            case TicTacToe -> createNetworkTicTacToe(actionEvent, loader);
-            case Test -> {}
+            case TIC_TAC_TOE -> createNetworkTicTacToe(actionEvent);
+            case TEST -> {}
         }
     }
 
     @FXML
     public void joinRoomButton(ActionEvent actionEvent){
-        FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
         switch(selectedGame){
-            case TicTacToe -> joinNetworkTicTacToe(actionEvent, loader);
-            case Test -> {}
+            case TIC_TAC_TOE -> joinNetworkTicTacToe(actionEvent);
+            case TEST -> {}
         }
     }
 
@@ -146,10 +150,9 @@ public class MenuController implements GameController{
         try{
             int size=getSize(3);
             TicTacToeController controller=loader.getController();
-            controller.createGameInterface(size, false);
 
-            controller.addPlayer(secondPlayer);
-            secondPlayer.setGame(controller.getGame());
+            List<Player> players=List.of(currentPlayer, secondPlayer);
+            controller.createOfflineGameInterface(players, size);
         }
         catch(Exception e){
             e.printStackTrace();
@@ -157,21 +160,22 @@ public class MenuController implements GameController{
         }
     }
 
-    private void createNetworkTicTacToe(ActionEvent actionEvent, FXMLLoader loader){
+    private void createNetworkTicTacToe(ActionEvent actionEvent){
         try{
-            //Création du plateau de jeu
-            int size=getSize(3);
-            TicTacToeController controller=loader.getController();
-            controller.createGameInterface(size, true);
-
             //Communication avec le serveur
+            int size=getSize(3);
             networkManager.connectToServer();
-            networkManager.sendMessageToServer("CREATE_ROOM TIC_TAC_TOE "+size+" 2 "+currentPlayer.getName());
+            networkManager.sendMessageToServer(Commands.CREATE_ROOM+" "+Games.TIC_TAC_TOE+" "+size+" "+currentPlayer.getName());
 
             //Réception de la réponse du serveur
             int roomId=Integer.parseInt(networkManager.receiveMessageFromServer());
-            if(roomId!=-1) controller.setRoomId(roomId);
-            networkManager.closeConnection();
+
+            //Création du plateau de jeu
+            if(roomId!=-1){
+                FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
+                TicTacToeController controller=loader.getController();
+                controller.createOnlineGameInterface(roomId);
+            }
         }
         catch(Exception e){
             e.printStackTrace();
@@ -179,8 +183,33 @@ public class MenuController implements GameController{
         }
     }
 
-    private void joinNetworkTicTacToe(ActionEvent actionEvent, FXMLLoader loader){
-        //TODO
+    private void joinNetworkTicTacToe(ActionEvent actionEvent){
+        joinErrorMessageLabel.setVisible(false);
+
+        try{
+            //Communication avec le serveur
+            int roomId=getRoomNumber();
+            networkManager.connectToServer();
+            networkManager.sendMessageToServer(Commands.JOIN_ROOM+" "+roomId+" "+currentPlayer.getName());
+
+            //Réception de la réponse du serveur
+            boolean isJoin=Boolean.parseBoolean(networkManager.receiveMessageFromServer());
+
+            //Création du plateau de jeu
+            if(isJoin){
+                FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
+                TicTacToeController controller=loader.getController();
+                controller.createOnlineGameInterface(roomId);
+            }
+            else{
+                joinErrorMessageLabel.setText(Constants.ERROR_MESSAGE_JOIN_ROOM);
+                joinErrorMessageLabel.setVisible(true);
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            System.out.println("Cannot join tic tac toe boardgame.");
+        }
     }
 
     @FXML

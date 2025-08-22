@@ -23,6 +23,8 @@ module setsuna.boardgame{
     exports setsuna.boardgame.utils.password;
     exports setsuna.boardgame.model.general.player;
     opens setsuna.boardgame.model.general.player to javafx.fxml;
-    exports setsuna.boardgame.controller.network;
-    opens setsuna.boardgame.controller.network to javafx.fxml;
+    exports setsuna.boardgame.utils.network;
+    opens setsuna.boardgame.utils.network to javafx.fxml;
+    exports setsuna.boardgame.server;
+    opens setsuna.boardgame.server to javafx.fxml;
 }

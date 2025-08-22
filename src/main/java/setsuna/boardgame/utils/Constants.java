@@ -25,6 +25,7 @@ public class Constants{
     //Serveur
     public static final String SERVER_HOST="127.0.0.1";
     public static final int SERVER_PORT=7_777;
+    public static final String ERROR_MESSAGE_JOIN_ROOM="Error while joining the room.";
 
     private static final String password="MySecretWord01";
 }

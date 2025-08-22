@@ -1,7 +1,6 @@
-package setsuna.boardgame.controller.network;
+package setsuna.boardgame.utils.network;
 
 import setsuna.boardgame.utils.Constants;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,7 +23,11 @@ public class NetworkManager{
     }
 
     public String receiveMessageFromServer() throws IOException{
-        if(in!=null) return in.readLine();
+        if(in!=null){
+            String res=in.readLine();
+            System.out.println(res);
+            return res;
+        }
         return null;
     }
 

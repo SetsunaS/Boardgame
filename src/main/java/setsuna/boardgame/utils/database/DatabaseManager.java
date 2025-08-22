@@ -2,7 +2,6 @@ package setsuna.boardgame.utils.database;
 
 import setsuna.boardgame.GameApplication;
 import setsuna.boardgame.utils.Constants;
-
 import java.sql.*;
 import java.util.Properties;
 

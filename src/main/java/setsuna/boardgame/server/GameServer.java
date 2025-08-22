@@ -1,0 +1,171 @@
+package setsuna.boardgame.server;
+
+import setsuna.boardgame.model.games.GameModel;
+import setsuna.boardgame.model.games.Games;
+import setsuna.boardgame.model.games.TicTacToe;
+import setsuna.boardgame.model.general.exception.InvalidMoveException;
+import setsuna.boardgame.model.general.exception.PlayerFullException;
+import setsuna.boardgame.utils.Constants;
+import setsuna.boardgame.utils.network.Commands;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class GameServer{
+    private ServerSocket serverSocket;
+    private final GameLobby gameLobby;
+
+    public GameServer(){
+        this.gameLobby=new GameLobby();
+    }
+
+    public void start(){
+        //Initialisation du port
+        try{
+            serverSocket=new ServerSocket(Constants.SERVER_PORT);
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println("Error while creating new ServerSocket with port "+Constants.SERVER_PORT);
+        }
+
+        ExecutorService threadPool=Executors.newFixedThreadPool(10);
+        while(true){
+            try{
+                //Connexion des clients
+                Socket clientSocket=serverSocket.accept();
+
+                //Gestion de la communication avec les clients
+                threadPool.submit(() -> handleClient(clientSocket));
+            }
+            catch(IOException e){
+                e.printStackTrace();
+                System.out.println("Error while accepting client socket.");
+            }
+        }
+    }
+
+    private void handleClient(Socket clientSocket){
+        try(BufferedReader in=new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            PrintWriter out=new PrintWriter(clientSocket.getOutputStream(), true)){
+
+            String inputLine;
+            String[] message;
+            while((inputLine=in.readLine())!=null){
+                System.out.println(inputLine);
+
+                message=inputLine.split(" ");
+                switch(Commands.valueOf(message[0])){
+                    case CREATE_ROOM: {
+                        Games game=Games.valueOf(message[1]);
+                        int gameSize=Integer.parseInt(message[2]);
+                        String hostName=message[3];
+
+                        int roomId=gameLobby.createRoom(getGameModel(game, gameSize), hostName, out);
+                        out.println(roomId);
+                        break;
+                    }
+
+                    case JOIN_ROOM: {
+                        int roomId=Integer.parseInt(message[1]);
+                        String playerName=message[2];
+
+                        boolean isJoin=gameLobby.joinRoom(roomId, playerName, out);
+                        out.println(isJoin);
+                        break;
+                    }
+
+                    case GIVE_UP: {
+
+                        break;
+                    }
+
+                    case IS_ROOM_FULL: {
+                        int roomId=Integer.parseInt(message[1]);
+
+                        String isRoomFullRes=gameLobby.isRoomFull(roomId);
+                        out.println(isRoomFullRes);
+                        break;
+                    }
+
+                    case PLAY: {
+                        String playerName=message[1];
+                        int roomId=Integer.parseInt(message[2]);
+                        int h=Integer.parseInt(message[3]);
+                        int w=Integer.parseInt(message[4]);
+
+                        String playRes=gameLobby.play(playerName, roomId, h, w);
+                        System.out.println("res: "+playRes);
+                        out.println(playRes);
+                        break;
+                    }
+
+                    case GET_PLAYER_NAME: {
+                        int roomId=Integer.parseInt(message[1]);
+
+                        String currentPlayerName=gameLobby.getPlayerName(roomId);
+                        out.println(currentPlayerName);
+                        break;
+                    }
+
+                    case GET_BOARD_SIZE: {
+                        int roomId=Integer.parseInt(message[1]);
+
+                        int size=gameLobby.getBoardSize(roomId);
+                        out.println(size);
+                        break;
+                    }
+
+                    case IS_GAME_OVER: {
+                        int roomId=Integer.parseInt(message[1]);
+
+                        String isGameOverRes=gameLobby.isGameOver(roomId);
+                        out.println(isGameOverRes);
+                        break;
+                    }
+
+                    default:
+                }
+            }
+        }
+        catch(IOException e){
+            System.out.println("Communication error with clients.");
+        }
+        catch(PlayerFullException e){
+            throw new RuntimeException(e);
+        }
+        catch(InvalidMoveException e){
+            throw new RuntimeException(e);
+        }
+        finally{
+            try{
+                clientSocket.close();
+            }
+            catch(IOException e){
+                System.out.println("Error while closing client socket.");
+            }
+        }
+    }
+
+    private GameModel getGameModel(Games game, int size){
+        switch(game){
+            case TIC_TAC_TOE: return new TicTacToe(size);
+            default: return null;
+        }
+    }
+
+    public void stop() throws IOException{
+        serverSocket.close();
+    }
+
+    public static void main(String[] args){
+        //Crée le serveur et le lance
+        GameServer server=new GameServer();
+        server.start();
+    }
+}

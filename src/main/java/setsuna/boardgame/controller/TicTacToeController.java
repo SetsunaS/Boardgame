@@ -7,7 +7,9 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import setsuna.boardgame.controller.network.NetworkManager;
+import setsuna.boardgame.model.general.player.HumanPlayer;
+import setsuna.boardgame.utils.network.Commands;
+import setsuna.boardgame.utils.network.NetworkManager;
 import setsuna.boardgame.model.general.player.Player;
 import setsuna.boardgame.model.general.player.ai.TicTacToeAiPlayer;
 import setsuna.boardgame.model.games.TicTacToe;
@@ -16,11 +18,11 @@ import setsuna.boardgame.model.general.exception.InvalidMoveException;
 import setsuna.boardgame.model.general.exception.PlayerFullException;
 import setsuna.boardgame.utils.CustomAlert;
 import setsuna.boardgame.utils.ViewChanger;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TicTacToeController implements GameController{
+public class TicTacToeController implements ControllerInterface, GameControllerInterface{
     @FXML
     private StackPane rootPane;
 
@@ -51,9 +53,9 @@ public class TicTacToeController implements GameController{
     @FXML
     private Label gameWinnerLabel;
 
-    private boolean isOnline;
     private Player currentPlayer;
     private TicTacToe game;
+    private boolean isOnline;
     private int roomId;
     private List<Button> buttons=new ArrayList<>();
     private NetworkManager networkManager;
@@ -66,10 +68,6 @@ public class TicTacToeController implements GameController{
     @Override
     public void setNetworkManager(NetworkManager networkManager){
         this.networkManager=networkManager;
-    }
-
-    public void setRoomId(int roomId){
-        this.roomId=roomId;
     }
 
     public TicTacToe getGame(){
@@ -91,40 +89,37 @@ public class TicTacToeController implements GameController{
         ticTacToeGridPane.vgapProperty().bind(ticTacToeGridPane.heightProperty().multiply(0.01));
     }
 
-    //Créer la grille de jeu dynamiquement
-    public void createGameInterface(int size, boolean isOnline){
-        this.isOnline=isOnline;
+    @Override
+    public void createOfflineGameInterface(List<Player> players, int size){
+        this.isOnline=false;
 
         //Gestion du model dans le controller si jeu en local
-        if(!isOnline){
-            this.game=new TicTacToe(size);
-            addPlayer(currentPlayer);
-        }
+        this.game=new TicTacToe(size);
 
-        //Affichage du joueur courant
-        changeCurrentPlayerName();
+        //Joueurs
+        for(Player player: players) addOfflinePlayer(player);
+        updateCurrentPlayerName();
 
         //Création du plateau de jeu
-        createBoard(game.getBoardSize());
+        createBoard(size);
     }
 
-    public void addPlayer(Player player){
-        try{
-            game.addPlayer(player);
-        }
-        catch(PlayerFullException e){
-            System.out.println("Board game is full.");
-        }
+    @Override
+    public void createOnlineGameInterface(int roomId){
+        this.isOnline=true;
+        this.roomId=roomId;
+
+        //Affichage du joueur courant
+        updateCurrentPlayerName();
+
+        //Création du plateau de jeu
+        createBoard();
+
+        //Attendre que la salle se remplisse
+        waitPlayer();
     }
 
-    private void changeCurrentPlayerName(){
-        if(game.getCurrentPlayer()!=null) playerNameLabel.setText("Current player is "+game.getCurrentPlayer().getName());
-        else if(isOnline){
-            networkManager.sendMessageToServer("GET_PLAYER_NAME "+roomId);
-            playerNameLabel.setText("Current player is "+"");
-        }
-    }
-
+    //Crée la grille de jeu dynamiquement
     private void createBoard(int size){
         for(int i=0; i<size; i++){
             ColumnConstraints columnConstraints=new ColumnConstraints();
@@ -154,6 +149,52 @@ public class TicTacToeController implements GameController{
         }
     }
 
+    private void createBoard(){
+        try{
+            networkManager.sendMessageToServer(Commands.GET_BOARD_SIZE+" "+roomId);
+            int size=Integer.parseInt(networkManager.receiveMessageFromServer());
+            if(size>-1) createBoard(size);
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println("Error while asking board game size.");
+        }
+    }
+
+    public void addOfflinePlayer(Player player){
+        try{
+            if(!isOnline){
+                game.addPlayer(player);
+                player.setGame(game);
+            }
+        }
+        catch(PlayerFullException e){
+            System.out.println("Board game is full.");
+        }
+    }
+
+    //Attendre que les joueurs se réunissent
+    private void waitPlayer(){
+        networkManager.sendMessageToServer(Commands.IS_ROOM_FULL+" "+roomId);
+        try{
+            String serverResponse=networkManager.receiveMessageFromServer();
+            setPlayerNumber(serverResponse);
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println("Error while asking room fully state.");
+        }
+    }
+
+    public void setPlayerNumber(String serverResponse){
+        String[] response=serverResponse.split(" ");
+        boolean canStart=Boolean.parseBoolean(response[0]);
+        if(canStart) roomIdLabel.setText("Room: "+roomId);
+        else roomIdLabel.setText("Room: "+roomId+" - "+response[1]+"/"+response[2]+" players");
+    }
+
+
+    /* Boutons */
     private void disableButtons(){
         for(Button button: buttons) button.setDisable(true);
     }
@@ -173,15 +214,30 @@ public class TicTacToeController implements GameController{
         int w=Character.getNumericValue(buttonID.charAt(7));
 
         if(isOnline){
-            //TODO: Envoie de message au serveur
-            //TODO: Attente de réponse
+            networkManager.sendMessageToServer(Commands.PLAY+" "+currentPlayer.getName()+" "+roomId+" "+h+" "+w);
+            try{
+                String[] response=networkManager.receiveMessageFromServer().split(" ");
+                if(Boolean.parseBoolean(response[0])){
+                    Pawn pawn=Pawn.toPawn(response[1]);
+                    updateButton(clickedButton, pawn);
+                    updateCurrentPlayerName();
+                    updateWinner();
+                }
+                //TODO: Attente de l'action de l'adversaire
+
+            }
+            catch(Exception e){
+                e.printStackTrace();
+                System.out.println("Error while clicking on the board.");
+            }
         }
         else{
             try{
                 //Ajout du pion joué
                 Pawn pawn=game.play(h, w);
                 updateButton(clickedButton, pawn);
-                updatePlayer();
+                updateCurrentPlayerName();
+                updateWinner();
 
                 //Si l'adversaire est une ia
                 if(game.getCurrentPlayer() instanceof TicTacToeAiPlayer){
@@ -191,7 +247,8 @@ public class TicTacToeController implements GameController{
                     updateButton(clickedButton, pawn);
                     game.resetLastPosition();
 
-                    updatePlayer();
+                    updateCurrentPlayerName();
+                    updateWinner();
                 }
             }
             catch(InvalidMoveException e){}
@@ -204,19 +261,54 @@ public class TicTacToeController implements GameController{
         enableButtons();
     }
 
-    private void updatePlayer(){
-        //Joueur courant
-        changeCurrentPlayerName();
-
-        //Fin de jeu
-        if(game.isGameOver()){
-            Player winner=game.getWinner();
-            if(winner==null) gameWinnerLabel.setText("Draw");
-            else{
-                gameWinnerLabel.setText("Winner is player "+winner.getName());
-                winner.addScore(10);
+    private void updateCurrentPlayerName(){
+        if(isOnline){
+            try{
+                networkManager.sendMessageToServer(Commands.GET_PLAYER_NAME+" "+roomId);
+                String currentPlayerName=networkManager.receiveMessageFromServer();
+                playerNameLabel.setText("Current player is "+currentPlayerName);
             }
-            showWinner();
+            catch(IOException e){
+                e.printStackTrace();
+                System.out.println("Error while displaying current player name");
+            }
+        }
+        else{
+            Player currentPlayer=game.getCurrentPlayer();
+            if(currentPlayer!=null) playerNameLabel.setText("Current player is "+currentPlayer.getName());
+        }
+    }
+
+    private void updateWinner(){
+        if(isOnline){
+            try{
+                networkManager.sendMessageToServer(Commands.IS_GAME_OVER+" "+roomId);
+                String[] response=networkManager.receiveMessageFromServer().split(" ");
+                if(Boolean.parseBoolean(response[0])){
+                    String winner=response[1];
+                    if(winner==null) gameWinnerLabel.setText("Draw");
+                    else{
+                        gameWinnerLabel.setText("Winner is player "+winner);
+                        new HumanPlayer(winner).addScore(10);
+                    }
+                    showWinner();
+                }
+            }
+            catch(IOException e){
+                e.printStackTrace();
+                System.out.println("Error while displaying current player name");
+            }
+        }
+        else{
+            if(game.isGameOver()){
+                Player winner=game.getWinner();
+                if(winner==null) gameWinnerLabel.setText("Draw");
+                else{
+                    gameWinnerLabel.setText("Winner is player "+winner.getName());
+                    winner.addScore(10);
+                }
+                showWinner();
+            }
         }
     }
 

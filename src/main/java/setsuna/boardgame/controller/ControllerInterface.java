@@ -1,9 +1,9 @@
 package setsuna.boardgame.controller;
 
-import setsuna.boardgame.controller.network.NetworkManager;
+import setsuna.boardgame.utils.network.NetworkManager;
 import setsuna.boardgame.model.general.player.Player;
 
-public interface GameController{
+public interface ControllerInterface{
     void setCurrentPlayer(Player player);
 
     void setNetworkManager(NetworkManager networkManager);

@@ -8,9 +8,9 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import setsuna.boardgame.GameApplication;
-import setsuna.boardgame.controller.GameController;
-import setsuna.boardgame.controller.network.NetworkManager;
-import setsuna.boardgame.model.games.GamesEnum;
+import setsuna.boardgame.controller.ControllerInterface;
+import setsuna.boardgame.utils.network.NetworkManager;
+import setsuna.boardgame.model.games.Games;
 import setsuna.boardgame.model.general.player.Player;
 
 import java.io.IOException;
@@ -40,9 +40,9 @@ public class ViewChanger{
             //Changement de scène
             currentScene.setRoot(loader.load());
 
-            GameController gameController=loader.getController();
-            gameController.setCurrentPlayer(player);
-            gameController.setNetworkManager(networkManager);
+            ControllerInterface controllerInterface=loader.getController();
+            controllerInterface.setCurrentPlayer(player);
+            controllerInterface.setNetworkManager(networkManager);
 
             return loader;
         }
@@ -62,10 +62,10 @@ public class ViewChanger{
         return changeScene(actionEvent, Constants.LOGIN_VIEW_PATH, player, networkManager);
     }
 
-    public static FXMLLoader changeSceneToGame(ActionEvent actionEvent, GamesEnum gameNumber, Player player, NetworkManager networkManager){
+    public static FXMLLoader changeSceneToGame(ActionEvent actionEvent, Games gameNumber, Player player, NetworkManager networkManager){
         return switch(gameNumber){
-            case TicTacToe -> changeScene(actionEvent, Constants.TIC_TAC_TOE_VIEW_PATH, player, networkManager);
-            case Test -> null;
+            case TIC_TAC_TOE -> changeScene(actionEvent, Constants.TIC_TAC_TOE_VIEW_PATH, player, networkManager);
+            case TEST -> null;
         };
     }
 
