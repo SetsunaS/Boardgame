@@ -6,6 +6,7 @@ import setsuna.boardgame.model.general.exception.InvalidMoveException;
 import setsuna.boardgame.model.general.exception.PlayerFullException;
 import setsuna.boardgame.model.general.player.HumanPlayer;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -74,6 +75,11 @@ public class GameSession{
     public Pawn play(int h, int w) throws InvalidMoveException{
         return gameModel.play(h, w);
     }
+
+    public Collection<PrintWriter> getPrintWriter(){
+        return clientsWriter.values();
+    }
+
     public boolean isGameOver(){
         return gameModel.isGameOver();
     }

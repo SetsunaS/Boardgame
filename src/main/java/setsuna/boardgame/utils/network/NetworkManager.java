@@ -19,13 +19,14 @@ public class NetworkManager{
     }
 
     public void sendMessageToServer(String message){
+        System.out.println("sent message to server : "+message);
         if(out!=null) out.println(message);
     }
 
     public String receiveMessageFromServer() throws IOException{
         if(in!=null){
             String res=in.readLine();
-            System.out.println(res);
+            System.out.println("received message from server : "+res);
             return res;
         }
         return null;

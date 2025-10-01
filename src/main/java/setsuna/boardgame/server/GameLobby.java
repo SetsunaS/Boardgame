@@ -5,6 +5,7 @@ import setsuna.boardgame.model.general.Pawn;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
 import setsuna.boardgame.model.general.exception.PlayerFullException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,6 +62,12 @@ public class GameLobby{
             return true+" "+pawn;
         }
         return false+"";
+    }
+
+    public Collection<PrintWriter> getPrintWriter(int roomId){
+        GameSession session=getGameSession(roomId);
+        if(session!=null) return session.getPrintWriter();
+        return null;
     }
 
     public String getPlayerName(int roomId){

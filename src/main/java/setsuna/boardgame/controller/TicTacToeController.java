@@ -1,5 +1,7 @@
 package setsuna.boardgame.controller;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -109,14 +111,24 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
         this.isOnline=true;
         this.roomId=roomId;
 
+        //Affichage du nombre de joueurs dans la salle
+        waitPlayer();
+
         //Affichage du joueur courant
         updateCurrentPlayerName();
 
         //Création du plateau de jeu
         createBoard();
 
-        //Attendre que la salle se remplisse
-        waitPlayer();
+        //Attendre que la salle se remplisse de manière asynchrone
+        Task<Void> waitTask=new Task<>(){
+            @Override
+            protected Void call() throws Exception{
+                while(waitPlayer()) Thread.sleep(1000);
+                return null;
+            }
+        };
+        new Thread(waitTask).start();
     }
 
     //Crée la grille de jeu dynamiquement
@@ -174,33 +186,40 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
     }
 
     //Attendre que les joueurs se réunissent
-    private void waitPlayer(){
-        networkManager.sendMessageToServer(Commands.IS_ROOM_FULL+" "+roomId);
+    private boolean waitPlayer(){
         try{
             String serverResponse=networkManager.receiveMessageFromServer();
-            setPlayerNumber(serverResponse);
+            String[] response=serverResponse.split(" ");
+
+            boolean canStart=Boolean.parseBoolean(response[0]);
+            if(canStart){
+                Platform.runLater(() -> roomIdLabel.setText("Room: "+roomId));
+                return false;
+            }
+            else{
+                Platform.runLater(() -> roomIdLabel.setText("Room: "+roomId+" - "+response[1]+"/"+response[2]+" players"));
+                return true;
+            }
         }
         catch(IOException e){
             e.printStackTrace();
             System.out.println("Error while asking room fully state.");
         }
-    }
-
-    public void setPlayerNumber(String serverResponse){
-        String[] response=serverResponse.split(" ");
-        boolean canStart=Boolean.parseBoolean(response[0]);
-        if(canStart) roomIdLabel.setText("Room: "+roomId);
-        else roomIdLabel.setText("Room: "+roomId+" - "+response[1]+"/"+response[2]+" players");
+        return false;
     }
 
 
     /* Boutons */
     private void disableButtons(){
-        for(Button button: buttons) button.setDisable(true);
+        Platform.runLater(() -> {
+            for(Button button: buttons) button.setDisable(true);
+        });
     }
 
     private void enableButtons(){
-        for(Button button: buttons) button.setDisable(false);
+        Platform.runLater(() -> {
+            for(Button button: buttons) button.setDisable(false);
+        });
     }
 
     @FXML
@@ -256,17 +275,24 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
     }
 
     private void updateButton(Button button, Pawn pawn){
-        button.setText(pawn.toString());
-        button.getStyleClass().add(pawn.toString());
+        //Platform.runLater(() -> {
+            button.setText(pawn.toString());
+            button.getStyleClass().add(pawn.toString());
+        //});
         enableButtons();
     }
 
     private void updateCurrentPlayerName(){
         if(isOnline){
             try{
+                //Nom du joueur courant
                 networkManager.sendMessageToServer(Commands.GET_PLAYER_NAME+" "+roomId);
                 String currentPlayerName=networkManager.receiveMessageFromServer();
+
+                //Mise à jour de l'affichage
+                //Platform.runLater(() -> playerNameLabel.setText("Current player is "+currentPlayerName));
                 playerNameLabel.setText("Current player is "+currentPlayerName);
+                if(!currentPlayerName.equals(currentPlayer.getName())) disableButtons();
             }
             catch(IOException e){
                 e.printStackTrace();

@@ -68,6 +68,11 @@ public class GameServer{
 
                         int roomId=gameLobby.createRoom(getGameModel(game, gameSize), hostName, out);
                         out.println(roomId);
+
+                        //Réponse à IS_ROOM_FULL
+                        String isRoomFullRes=gameLobby.isRoomFull(roomId);
+                        for(PrintWriter player: gameLobby.getPrintWriter(roomId))
+                            player.println(isRoomFullRes);
                         break;
                     }
 
@@ -77,6 +82,11 @@ public class GameServer{
 
                         boolean isJoin=gameLobby.joinRoom(roomId, playerName, out);
                         out.println(isJoin);
+
+                        //Réponse à IS_ROOM_FULL
+                        String isRoomFullRes=gameLobby.isRoomFull(roomId);
+                        for(PrintWriter player: gameLobby.getPrintWriter(roomId))
+                            player.println(isRoomFullRes);
                         break;
                     }
 
@@ -86,10 +96,7 @@ public class GameServer{
                     }
 
                     case IS_ROOM_FULL: {
-                        int roomId=Integer.parseInt(message[1]);
-
-                        String isRoomFullRes=gameLobby.isRoomFull(roomId);
-                        out.println(isRoomFullRes);
+                        //Appelé que lors de l'attente de joueurs, donc réponse danns JOIN_ROOM
                         break;
                     }
 
@@ -100,8 +107,8 @@ public class GameServer{
                         int w=Integer.parseInt(message[4]);
 
                         String playRes=gameLobby.play(playerName, roomId, h, w);
-                        System.out.println("res: "+playRes);
-                        out.println(playRes);
+                        for(PrintWriter player: gameLobby.getPrintWriter(roomId))
+                            player.println(playRes);
                         break;
                     }
 
