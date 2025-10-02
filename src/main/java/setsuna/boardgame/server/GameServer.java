@@ -70,9 +70,7 @@ public class GameServer{
                         out.println(roomId);
 
                         //Réponse à IS_ROOM_FULL
-                        String isRoomFullRes=gameLobby.isRoomFull(roomId);
-                        for(PrintWriter player: gameLobby.getPrintWriter(roomId))
-                            player.println(isRoomFullRes);
+                        gameLobby.broadcast(roomId, gameLobby.isRoomFull(roomId));
                         break;
                     }
 
@@ -84,31 +82,12 @@ public class GameServer{
                         out.println(isJoin);
 
                         //Réponse à IS_ROOM_FULL
-                        String isRoomFullRes=gameLobby.isRoomFull(roomId);
-                        for(PrintWriter player: gameLobby.getPrintWriter(roomId))
-                            player.println(isRoomFullRes);
-                        break;
-                    }
-
-                    case GIVE_UP: {
-
+                        if(isJoin) gameLobby.broadcast(roomId, gameLobby.isRoomFull(roomId));
                         break;
                     }
 
                     case IS_ROOM_FULL: {
                         //Appelé que lors de l'attente de joueurs, donc réponse danns JOIN_ROOM
-                        break;
-                    }
-
-                    case PLAY: {
-                        String playerName=message[1];
-                        int roomId=Integer.parseInt(message[2]);
-                        int h=Integer.parseInt(message[3]);
-                        int w=Integer.parseInt(message[4]);
-
-                        String playRes=gameLobby.play(playerName, roomId, h, w);
-                        for(PrintWriter player: gameLobby.getPrintWriter(roomId))
-                            player.println(playRes);
                         break;
                     }
 
@@ -128,11 +107,28 @@ public class GameServer{
                         break;
                     }
 
+                    case PLAY: {
+                        String playerName=message[1];
+                        int roomId=Integer.parseInt(message[2]);
+                        int h=Integer.parseInt(message[3]);
+                        int w=Integer.parseInt(message[4]);
+
+                        String playRes=gameLobby.play(playerName, roomId, h, w);
+                        if(playRes.equals("false")) out.println(playRes);
+                        else gameLobby.broadcast(roomId, playRes);
+                        break;
+                    }
+
                     case IS_GAME_OVER: {
                         int roomId=Integer.parseInt(message[1]);
 
                         String isGameOverRes=gameLobby.isGameOver(roomId);
                         out.println(isGameOverRes);
+                        break;
+                    }
+
+                    case GIVE_UP: {
+
                         break;
                     }
 
@@ -143,10 +139,7 @@ public class GameServer{
         catch(IOException e){
             System.out.println("Communication error with clients.");
         }
-        catch(PlayerFullException e){
-            throw new RuntimeException(e);
-        }
-        catch(InvalidMoveException e){
+        catch(PlayerFullException|InvalidMoveException e){
             throw new RuntimeException(e);
         }
         finally{

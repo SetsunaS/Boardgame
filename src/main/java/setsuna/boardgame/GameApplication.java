@@ -11,6 +11,9 @@ public class GameApplication extends Application{
         stage.setMaximized(true);
         stage.setTitle("Boardgame");
 
+        stage.setMinWidth(500);
+        stage.setMinHeight(500);
+
         stage.setScene(ViewChanger.createLoginScene());
         stage.show();
     }

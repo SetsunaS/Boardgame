@@ -59,15 +59,15 @@ public class GameLobby{
         GameSession session=getGameSession(roomId);
         if(session!=null && playerName.equals(session.getCurrentPlayerName()) && session.isValidMove(h, w)){
             Pawn pawn=session.play(h, w);
-            return true+" "+pawn;
+            int boardSize=session.getBoardSize();
+            return true+" "+pawn+" "+h+" "+w+" "+boardSize;
         }
         return false+"";
     }
 
-    public Collection<PrintWriter> getPrintWriter(int roomId){
+    public void broadcast(int roomId, String message){
         GameSession session=getGameSession(roomId);
-        if(session!=null) return session.getPrintWriter();
-        return null;
+        if(session!=null) session.broadcast(message);
     }
 
     public String getPlayerName(int roomId){

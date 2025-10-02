@@ -45,10 +45,10 @@ public class GameSession{
         return false;
     }
 
-    /*public void broadcastMessage(String message){
+    public void broadcast(String message){
         for(PrintWriter writer: clientsWriter.values())
             writer.println(message);
-    }*/
+    }
 
     public boolean removePlayer(String playerName){
         return gameModel.removePlayer(new HumanPlayer(playerName));

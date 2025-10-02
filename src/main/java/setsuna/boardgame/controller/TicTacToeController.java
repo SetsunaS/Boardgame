@@ -72,10 +72,6 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
         this.networkManager=networkManager;
     }
 
-    public TicTacToe getGame(){
-        return game;
-    }
-
     @FXML
     private void initialize(){
         //Fixe la taille de la grille de jeu selon la taille la plus petite de largeur/longueur
@@ -91,6 +87,8 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
         ticTacToeGridPane.vgapProperty().bind(ticTacToeGridPane.heightProperty().multiply(0.01));
     }
 
+
+    /** Création de l'interface de jeu **/
     @Override
     public void createOfflineGameInterface(List<Player> players, int size){
         this.isOnline=false;
@@ -112,26 +110,32 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
         this.roomId=roomId;
 
         //Affichage du nombre de joueurs dans la salle
-        waitPlayer();
+        boolean needToWaitPlayer=waitPlayer();
 
         //Affichage du joueur courant
         updateCurrentPlayerName();
 
         //Création du plateau de jeu
-        createBoard();
+        createOnlineBoard();
 
         //Attendre que la salle se remplisse de manière asynchrone
-        Task<Void> waitTask=new Task<>(){
-            @Override
-            protected Void call() throws Exception{
-                while(waitPlayer()) Thread.sleep(1000);
-                return null;
-            }
-        };
-        new Thread(waitTask).start();
+        disableButtons();
+        if(needToWaitPlayer){
+            Task<Void> waitTask=new Task<>(){
+                @Override
+                protected Void call() throws Exception{
+                    while(waitPlayer()) Thread.sleep(1);
+                    if(isCurrentPlayer()) enableButtons();
+                    return null;
+                }
+            };
+            new Thread(waitTask).start();
+        }
     }
 
-    //Crée la grille de jeu dynamiquement
+
+    /** Gestion de la grille **/
+    //Création de la grille de jeu dynamiquement
     private void createBoard(int size){
         for(int i=0; i<size; i++){
             ColumnConstraints columnConstraints=new ColumnConstraints();
@@ -161,11 +165,11 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
         }
     }
 
-    private void createBoard(){
+    private void createOnlineBoard(){
         try{
             networkManager.sendMessageToServer(Commands.GET_BOARD_SIZE+" "+roomId);
-            int size=Integer.parseInt(networkManager.receiveMessageFromServer());
-            if(size>-1) createBoard(size);
+            int boardSize=Integer.parseInt(networkManager.receiveMessageFromServer());
+            if(boardSize>-1) createBoard(boardSize);
         }
         catch(IOException e){
             e.printStackTrace();
@@ -173,6 +177,8 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
         }
     }
 
+
+    /** Gestion des joueurs **/
     public void addOfflinePlayer(Player player){
         try{
             if(!isOnline){
@@ -208,78 +214,17 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
         return false;
     }
 
-
-    /* Boutons */
-    private void disableButtons(){
-        Platform.runLater(() -> {
-            for(Button button: buttons) button.setDisable(true);
-        });
-    }
-
-    private void enableButtons(){
-        Platform.runLater(() -> {
-            for(Button button: buttons) button.setDisable(false);
-        });
-    }
-
-    @FXML
-    public void onGridButtonClick(ActionEvent actionEvent){
-        disableButtons();
-
-        //Extraction du numéro de bouton au format buttonRowCol
-        Button clickedButton=(Button)actionEvent.getSource();
-        String buttonID=clickedButton.getId();
-        int h=Character.getNumericValue(buttonID.charAt(6));
-        int w=Character.getNumericValue(buttonID.charAt(7));
-
-        if(isOnline){
-            networkManager.sendMessageToServer(Commands.PLAY+" "+currentPlayer.getName()+" "+roomId+" "+h+" "+w);
-            try{
-                String[] response=networkManager.receiveMessageFromServer().split(" ");
-                if(Boolean.parseBoolean(response[0])){
-                    Pawn pawn=Pawn.toPawn(response[1]);
-                    updateButton(clickedButton, pawn);
-                    updateCurrentPlayerName();
-                    updateWinner();
-                }
-                //TODO: Attente de l'action de l'adversaire
-
-            }
-            catch(Exception e){
-                e.printStackTrace();
-                System.out.println("Error while clicking on the board.");
-            }
+    private boolean isCurrentPlayer(){
+        try{
+            networkManager.sendMessageToServer(Commands.GET_PLAYER_NAME+" "+roomId);
+            String currentPlayerName=networkManager.receiveMessageFromServer();
+            return currentPlayerName.equals(currentPlayer.getName());
         }
-        else{
-            try{
-                //Ajout du pion joué
-                Pawn pawn=game.play(h, w);
-                updateButton(clickedButton, pawn);
-                updateCurrentPlayerName();
-                updateWinner();
-
-                //Si l'adversaire est une ia
-                if(game.getCurrentPlayer() instanceof TicTacToeAiPlayer){
-                    pawn=game.getCurrentPlayer().play();
-
-                    clickedButton=(Button)rootPane.lookup("#button"+game.getLastHPlayed()+game.getLastWPlayed());
-                    updateButton(clickedButton, pawn);
-                    game.resetLastPosition();
-
-                    updateCurrentPlayerName();
-                    updateWinner();
-                }
-            }
-            catch(InvalidMoveException e){}
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println("Error while asking current player name");
         }
-    }
-
-    private void updateButton(Button button, Pawn pawn){
-        //Platform.runLater(() -> {
-            button.setText(pawn.toString());
-            button.getStyleClass().add(pawn.toString());
-        //});
-        enableButtons();
+        return false;
     }
 
     private void updateCurrentPlayerName(){
@@ -290,9 +235,20 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
                 String currentPlayerName=networkManager.receiveMessageFromServer();
 
                 //Mise à jour de l'affichage
-                //Platform.runLater(() -> playerNameLabel.setText("Current player is "+currentPlayerName));
-                playerNameLabel.setText("Current player is "+currentPlayerName);
-                if(!currentPlayerName.equals(currentPlayer.getName())) disableButtons();
+                Platform.runLater(() -> playerNameLabel.setText("Current player is "+currentPlayerName));
+
+                //Pas le joueur courant, il attend son tour
+                if(!currentPlayerName.equals(currentPlayer.getName())){
+                    //Attendre que l'adversaire joue de manière asynchrone
+                    Task<Void> waitTask=new Task<>(){
+                        @Override
+                        protected Void call() throws Exception{
+                            while(waitPlay()) Thread.sleep(1000);
+                            return null;
+                        }
+                    };
+                    new Thread(waitTask).start();
+                }
             }
             catch(IOException e){
                 e.printStackTrace();
@@ -349,6 +305,111 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
         gameWinnerAnnounce.setManaged(true);
     }
 
+
+    /** Gestions des boutons **/
+    private void disableButtons(){
+        Platform.runLater(() -> {
+            for(Button button: buttons) button.setDisable(true);
+        });
+    }
+
+    private void enableButtons(){
+        Platform.runLater(() -> {
+            for(Button button: buttons) button.setDisable(false);
+        });
+    }
+
+    private void updateButton(Button button, Pawn pawn){
+        Platform.runLater(() -> {
+            button.setText(pawn.toString());
+            button.getStyleClass().add(pawn.toString());
+        });
+    }
+
+    private Button getButton(int h, int w, int boardSize){
+        int index=h*boardSize+w;
+        return buttons.get(index);
+    }
+
+    @FXML
+    //TODO
+    public void onGridButtonClick(ActionEvent actionEvent){
+        //Extraction du numéro de bouton au format buttonRowCol
+        Button clickedButton=(Button)actionEvent.getSource();
+        String buttonID=clickedButton.getId();
+        int h=Character.getNumericValue(buttonID.charAt(6));
+        int w=Character.getNumericValue(buttonID.charAt(7));
+
+        if(isOnline){
+            //Mon tour
+            networkManager.sendMessageToServer(Commands.PLAY+" "+currentPlayer.getName()+" "+roomId+" "+h+" "+w);
+            try{
+                String[] response=networkManager.receiveMessageFromServer().split(" ");
+                if(Boolean.parseBoolean(response[0])){
+                    Pawn pawn=Pawn.toPawn(response[1]);
+                    updateButton(clickedButton, pawn);
+                    disableButtons(); //coup valide, on empêche le joueur de jouer deux fois de suite
+
+                    updateWinner();
+                    updateCurrentPlayerName();
+                }
+            }
+            catch(Exception e){
+                e.printStackTrace();
+                System.out.println("Error while clicking on the board.");
+            }
+        }
+        else{
+            try{
+                //Ajout du pion joué
+                Pawn pawn=game.play(h, w);
+                updateButton(clickedButton, pawn);
+                updateCurrentPlayerName();
+                updateWinner();
+
+                //Si l'adversaire est une ia
+                if(game.getCurrentPlayer() instanceof TicTacToeAiPlayer){
+                    pawn=game.getCurrentPlayer().play();
+
+                    clickedButton=(Button)rootPane.lookup("#button"+game.getLastHPlayed()+game.getLastWPlayed());
+                    updateButton(clickedButton, pawn);
+                    game.resetLastPosition();
+
+                    updateCurrentPlayerName();
+                    updateWinner();
+                }
+            }
+            catch(InvalidMoveException e){}
+        }
+    }
+
+    private boolean waitPlay(){
+        try{
+            String serverResponse=networkManager.receiveMessageFromServer();
+            String[] response=serverResponse.split(" ");
+
+            if(Boolean.parseBoolean(response[0])){
+                enableButtons(); //coup valide de l'adversaire, on peut jouer après lui
+
+                Pawn pawn=Pawn.toPawn(response[1]);
+                int h=Integer.parseInt(response[2]);
+                int w=Integer.parseInt(response[3]);
+                int boardSize=Integer.parseInt(response[4]);
+                updateButton(getButton(h, w, boardSize), pawn);
+                updateCurrentPlayerName();
+                updateWinner();
+                return false;
+            }
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println("Error while waiting playing state.");
+        }
+        return true;
+    }
+
+
+    /** Gestion de fin de partie **/
     @FXML
     public void giveUp(ActionEvent actionEvent){
         try{

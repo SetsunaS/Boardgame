@@ -9,16 +9,9 @@ public enum Commands{
     //Serveur : (boolean)isJoin
     JOIN_ROOM,
 
-    //TODO
-    GIVE_UP,
-
     //Client : (Commands)IS_ROOM_FULL (int)roomId
     //Serveur : (boolean)isRoomFull (int)currentPlayerNumber (int)maxPlayersNumber
     IS_ROOM_FULL,
-
-    //Client : (Commands)PLAY (String)playerName (int)roomId (int)h (int)w
-    //Serveur : (boolean)isValidMove (Pawn)pawn
-    PLAY,
 
     //Client : (Commands)GET_PLAYER_NAME (int)roomId
     //Serveur : (String)currentPlayerName
@@ -28,7 +21,15 @@ public enum Commands{
     //Serveur : (int)size
     GET_BOARD_SIZE,
 
+    //Client : (Commands)PLAY (String)playerName (int)roomId (int)h (int)w
+    //Serveur : (boolean)isValidMove (Pawn)pawn (int)h (int)w (int)boardSize
+    PLAY,
+
+    //TODO
     //Client : (Commands)IS_GAME_OVER (int)roomId
     //Serveur : (boolean)isGameOver (String)winner
-    IS_GAME_OVER
+    IS_GAME_OVER,
+
+    //TODO
+    GIVE_UP
 }
