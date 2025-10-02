@@ -10,6 +10,7 @@ public class Constants{
 
 
     //Register error
+    public static final String ERROR_MESSAGE_USERNAME_NOT_VALID="The username you entered is not valid.";
     public static final String ERROR_MESSAGE_USERNAME_ALREADY_TAKEN="This username is already in use.";
     public static final String ERROR_MESSAGE_EMAIL_NOT_VALID="The email address you entered is not valid.";
     public static final String ERROR_MESSAGE_EMAIL_ALREADY_TAKEN="This email is already in use.";

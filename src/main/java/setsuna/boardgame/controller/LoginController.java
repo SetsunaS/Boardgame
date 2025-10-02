@@ -164,6 +164,11 @@ public class LoginController implements ControllerInterface{
     private static boolean isValidUsername(TextField usernameTextField, Label errorMessageLabel){
         String username=usernameTextField.getText();
 
+        if(!username.matches("[a-zA-Z0-9]+") || username.equals("null")){
+            setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_USERNAME_NOT_VALID);
+            return false;
+        }
+
         if(DatabaseManager.usernameAlreadyTaken(username)){
             setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_USERNAME_ALREADY_TAKEN);
             return false;
