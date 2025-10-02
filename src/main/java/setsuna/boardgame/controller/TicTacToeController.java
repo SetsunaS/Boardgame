@@ -124,7 +124,7 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
             Task<Void> waitTask=new Task<>(){
                 @Override
                 protected Void call() throws Exception{
-                    while(waitPlayer()) Thread.sleep(1);
+                    while(waitPlayer()) Thread.sleep(1000);
                     if(isCurrentPlayer()) enableButtons();
                     return null;
                 }
@@ -268,13 +268,14 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
                 String[] response=networkManager.receiveMessageFromServer().split(" ");
                 if(Boolean.parseBoolean(response[0])){
                     String winner=response[1];
-                    if(winner==null) gameWinnerLabel.setText("Draw");
+                    if(winner.equals("null")) Platform.runLater(() -> gameWinnerLabel.setText("Draw"));
                     else{
-                        gameWinnerLabel.setText("Winner is player "+winner);
+                        Platform.runLater(() -> gameWinnerLabel.setText("Winner is player "+winner));
                         new HumanPlayer(winner).addScore(10);
                     }
                     showWinner();
                 }
+                else updateCurrentPlayerName();
             }
             catch(IOException e){
                 e.printStackTrace();
@@ -332,7 +333,6 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
     }
 
     @FXML
-    //TODO
     public void onGridButtonClick(ActionEvent actionEvent){
         //Extraction du numéro de bouton au format buttonRowCol
         Button clickedButton=(Button)actionEvent.getSource();
@@ -351,7 +351,6 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
                     disableButtons(); //coup valide, on empêche le joueur de jouer deux fois de suite
 
                     updateWinner();
-                    updateCurrentPlayerName();
                 }
             }
             catch(Exception e){
@@ -364,7 +363,6 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
                 //Ajout du pion joué
                 Pawn pawn=game.play(h, w);
                 updateButton(clickedButton, pawn);
-                updateCurrentPlayerName();
                 updateWinner();
 
                 //Si l'adversaire est une ia
@@ -375,7 +373,6 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
                     updateButton(clickedButton, pawn);
                     game.resetLastPosition();
 
-                    updateCurrentPlayerName();
                     updateWinner();
                 }
             }
@@ -396,7 +393,6 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
                 int w=Integer.parseInt(response[3]);
                 int boardSize=Integer.parseInt(response[4]);
                 updateButton(getButton(h, w, boardSize), pawn);
-                updateCurrentPlayerName();
                 updateWinner();
                 return false;
             }

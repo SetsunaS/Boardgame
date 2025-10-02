@@ -26,7 +26,7 @@ public class GameLobby{
     public int createRoom(GameModel gameModel, String hostName, PrintWriter writer) throws PlayerFullException{
         if(gameModel!=null){
             int roomId=nextRoomNumber.getAndIncrement();
-            GameSession session=new GameSession(gameModel, hostName, writer, roomId);
+            GameSession session=new GameSession(gameModel, hostName, writer);
             gameSessions.put(roomId, session);
             return roomId;
         }
@@ -86,9 +86,10 @@ public class GameLobby{
         GameSession session=gameSessions.get(roomId);
         if(session!=null){
             boolean isGameOver=session.isGameOver();
-            String winner=null;
 
+            String winner=null;
             if(isGameOver) winner=session.getWinner();
+
             return isGameOver+" "+winner;
         }
         return null;

@@ -5,18 +5,17 @@ import setsuna.boardgame.model.general.Pawn;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
 import setsuna.boardgame.model.general.exception.PlayerFullException;
 import setsuna.boardgame.model.general.player.HumanPlayer;
+import setsuna.boardgame.model.general.player.Player;
+
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GameSession{
-    private final int roomId;
     private final GameModel gameModel;
     private final Map<String, PrintWriter> clientsWriter;
 
-    public GameSession(GameModel gameModel, String host, PrintWriter out, int roomId) throws PlayerFullException{
-        this.roomId=roomId;
+    public GameSession(GameModel gameModel, String host, PrintWriter out) throws PlayerFullException{
         this.gameModel=gameModel;
 
         gameModel.addPlayer(new HumanPlayer(host));
@@ -76,15 +75,13 @@ public class GameSession{
         return gameModel.play(h, w);
     }
 
-    public Collection<PrintWriter> getPrintWriter(){
-        return clientsWriter.values();
-    }
-
     public boolean isGameOver(){
         return gameModel.isGameOver();
     }
 
     public String getWinner(){
-        return gameModel.getWinner().getName();
+        Player winner=gameModel.getWinner();
+        if(winner==null) return null;
+        return winner.getName();
     }
 }

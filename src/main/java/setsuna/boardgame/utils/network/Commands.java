@@ -25,7 +25,6 @@ public enum Commands{
     //Serveur : (boolean)isValidMove (Pawn)pawn (int)h (int)w (int)boardSize
     PLAY,
 
-    //TODO
     //Client : (Commands)IS_GAME_OVER (int)roomId
     //Serveur : (boolean)isGameOver (String)winner
     IS_GAME_OVER,
