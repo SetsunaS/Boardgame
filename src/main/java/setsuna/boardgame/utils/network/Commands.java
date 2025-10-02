@@ -25,10 +25,12 @@ public enum Commands{
     //Serveur : (boolean)isValidMove (Pawn)pawn (int)h (int)w (int)boardSize
     PLAY,
 
-    //Client : (Commands)IS_GAME_OVER (int)roomId
+    //Client : (Commands)IS_GAME_OVER (int)roomId (String)playerName
     //Serveur : (boolean)isGameOver (String)winner
     IS_GAME_OVER,
 
+    //Client : (Commands)GIVE_UP (int)roomId (String)playerName
+    //Serveur : (boolean)isGiveUp
     //TODO
     GIVE_UP
 }

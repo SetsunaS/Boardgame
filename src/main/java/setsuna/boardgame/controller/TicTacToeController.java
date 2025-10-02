@@ -264,7 +264,7 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
     private void updateWinner(){
         if(isOnline){
             try{
-                networkManager.sendMessageToServer(Commands.IS_GAME_OVER+" "+roomId);
+                networkManager.sendMessageToServer(Commands.IS_GAME_OVER+" "+roomId+" "+currentPlayer.getName());
                 String[] response=networkManager.receiveMessageFromServer().split(" ");
                 if(Boolean.parseBoolean(response[0])){
                     String winner=response[1];
@@ -417,7 +417,22 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
             newStage.showAndWait(); //attend que la popup soit fermée
             if(customAlert.getResult()){
                 ViewChanger.changeSceneToMenu(actionEvent, currentPlayer, networkManager);
-                game.removePlayer(currentPlayer);
+
+                //TODO
+                if(isOnline){
+                    try{
+                        networkManager.sendMessageToServer(Commands.GIVE_UP+" "+roomId+" "+currentPlayer.getName());
+                        String[] response=networkManager.receiveMessageFromServer().split(" ");
+                        if(Boolean.parseBoolean(response[0])){
+
+                        }
+                    }
+                    catch(IOException e){
+                        e.printStackTrace();
+                        System.out.println("Error while giving up");
+                    }
+                }
+                else game.removePlayer(currentPlayer);
             }
         }
         catch(Exception e){
@@ -429,6 +444,6 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
     @FXML
     public void goBack(ActionEvent actionEvent){
         ViewChanger.changeSceneToMenu(actionEvent, currentPlayer, networkManager);
-        game.removePlayer(currentPlayer);
+        if(!isOnline) game.removePlayer(currentPlayer);
     }
 }

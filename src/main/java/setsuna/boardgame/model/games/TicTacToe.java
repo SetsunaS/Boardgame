@@ -194,6 +194,16 @@ public class TicTacToe implements GameModel, Cloneable{
         return null;
     }
 
+    @Override
+    public boolean giveUp(String playerName){
+        if(players[0].getName().equals(playerName)) currentPlayer=1;
+        else if(players[1].getName().equals(playerName)) currentPlayer=0;
+        else return false;
+
+        setGameOver();
+        return true;
+    }
+
     public int getLastHPlayed(){
         return lastPosition.getH();
     }

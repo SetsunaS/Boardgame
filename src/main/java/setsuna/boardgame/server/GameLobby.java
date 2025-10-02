@@ -41,8 +41,12 @@ public class GameLobby{
         return false;
     }
 
-    public void giveUp(){
-        //TODO
+    public boolean giveUp(int roomId, String playerName){
+        GameSession session=getGameSession(roomId);
+        if(session!=null){
+            return session.giveUp(playerName);
+        }
+        return false;
     }
 
     public String isRoomFull(int roomId){
@@ -82,13 +86,19 @@ public class GameLobby{
         return -1;
     }
 
-    public String isGameOver(int roomId){
+    public String isGameOver(int roomId, String playerName){
         GameSession session=gameSessions.get(roomId);
         if(session!=null){
             boolean isGameOver=session.isGameOver();
 
             String winner=null;
-            if(isGameOver) winner=session.getWinner();
+            if(isGameOver){
+                winner=session.getWinner();
+
+                //Supression de la session
+                session.removePlayer(playerName);
+                deleteRoom(roomId);
+            }
 
             return isGameOver+" "+winner;
         }

@@ -21,4 +21,5 @@ public interface GameModel{
 
     boolean isGameOver();
     Player getWinner();
+    boolean giveUp(String playerName);
 }

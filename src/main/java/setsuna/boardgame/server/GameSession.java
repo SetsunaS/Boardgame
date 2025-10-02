@@ -84,4 +84,8 @@ public class GameSession{
         if(winner==null) return null;
         return winner.getName();
     }
+
+    public boolean giveUp(String playerName){
+        return gameModel.giveUp(playerName);
+    }
 }

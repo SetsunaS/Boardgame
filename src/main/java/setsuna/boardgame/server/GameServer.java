@@ -121,14 +121,19 @@ public class GameServer{
 
                     case IS_GAME_OVER: {
                         int roomId=Integer.parseInt(message[1]);
+                        String playerName=message[2];
 
-                        String isGameOverRes=gameLobby.isGameOver(roomId);
+                        String isGameOverRes=gameLobby.isGameOver(roomId, playerName);
                         out.println(isGameOverRes);
                         break;
                     }
 
                     case GIVE_UP: {
+                        int roomId=Integer.parseInt(message[1]);
+                        String playerName=message[2];
 
+                        boolean giveUpRes=gameLobby.giveUp(roomId, playerName);
+                        out.println(giveUpRes);
                         break;
                     }
 
