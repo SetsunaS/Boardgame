@@ -76,9 +76,10 @@ public class GameServer{
 
                     case JOIN_ROOM: {
                         int roomId=Integer.parseInt(message[1]);
-                        String playerName=message[2];
+                        Games selectedGame=Games.valueOf(message[2]);
+                        String playerName=message[3];
 
-                        boolean isJoin=gameLobby.joinRoom(roomId, playerName, out);
+                        boolean isJoin=gameLobby.joinRoom(roomId, selectedGame, playerName, out);
                         out.println(isJoin);
 
                         //Réponse à IS_ROOM_FULL

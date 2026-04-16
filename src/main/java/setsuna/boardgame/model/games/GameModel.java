@@ -6,6 +6,8 @@ import setsuna.boardgame.model.general.exception.PlayerFullException;
 import setsuna.boardgame.model.general.player.Player;
 
 public interface GameModel{
+    boolean isSelectedGame(Games selectedGame);
+
     boolean canAddPlayer();
     int getMaxPlayersNumber();
     int getCurrentPlayerNumber();

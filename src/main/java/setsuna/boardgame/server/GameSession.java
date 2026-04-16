@@ -1,6 +1,7 @@
 package setsuna.boardgame.server;
 
 import setsuna.boardgame.model.games.GameModel;
+import setsuna.boardgame.model.games.Games;
 import setsuna.boardgame.model.general.Pawn;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
 import setsuna.boardgame.model.general.exception.PlayerFullException;
@@ -35,8 +36,8 @@ public class GameSession{
         return gameModel.getCurrentPlayerNumber();
     }
 
-    public boolean joinRoom(String playerName, PrintWriter out) throws PlayerFullException{
-        if(canAddPlayer()){
+    public boolean joinRoom(Games selectedGame, String playerName, PrintWriter out) throws PlayerFullException{
+        if(gameModel.isSelectedGame(selectedGame) && canAddPlayer()){
             gameModel.addPlayer(new HumanPlayer(playerName));
             clientsWriter.put(playerName, out);
             return true;

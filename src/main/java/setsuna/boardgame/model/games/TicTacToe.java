@@ -8,6 +8,8 @@ import setsuna.boardgame.model.general.exception.InvalidMoveException;
 import setsuna.boardgame.model.general.player.Player;
 
 public class TicTacToe implements GameModel, Cloneable{
+    private static final Games selectedGame=Games.TIC_TAC_TOE;
+
     public static final int MAX_PLAYERS_NUMBER=2;
     private Player[] players;
 
@@ -32,6 +34,11 @@ public class TicTacToe implements GameModel, Cloneable{
 
     public TicTacToe(){
         this(3);
+    }
+
+    @Override
+    public boolean isSelectedGame(Games selectedGame){
+        return selectedGame==TicTacToe.selectedGame;
     }
 
     @Override

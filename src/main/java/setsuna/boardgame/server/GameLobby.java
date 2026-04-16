@@ -1,6 +1,7 @@
 package setsuna.boardgame.server;
 
 import setsuna.boardgame.model.games.GameModel;
+import setsuna.boardgame.model.games.Games;
 import setsuna.boardgame.model.general.Pawn;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
 import setsuna.boardgame.model.general.exception.PlayerFullException;
@@ -33,10 +34,10 @@ public class GameLobby{
         return -1;
     }
 
-    public boolean joinRoom(int roomId, String player, PrintWriter writer) throws PlayerFullException{
+    public boolean joinRoom(int roomId, Games selectedGame, String player, PrintWriter writer) throws PlayerFullException{
         GameSession session=gameSessions.get(roomId);
         if(session!=null){
-            return session.joinRoom(player, writer);
+            return session.joinRoom(selectedGame, player, writer);
         }
         return false;
     }
