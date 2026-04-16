@@ -292,6 +292,7 @@ public class TicTacToeController implements ControllerInterface, GameControllerI
                 }
                 showWinner();
             }
+            else updateCurrentPlayerName();
         }
     }
 
