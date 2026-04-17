@@ -22,7 +22,7 @@ import setsuna.boardgame.utils.ViewChanger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TicTacToeController implements ControllerInterface, GameControllerInterface{
+public class TicTacToeController implements IController, IGameController{
     @FXML
     private StackPane rootPane;
 

@@ -13,7 +13,7 @@ import setsuna.boardgame.utils.password.PasswordCrypt;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LoginController implements ControllerInterface{
+public class LoginController implements IController{
     @FXML
     private TabPane tabPane;
 

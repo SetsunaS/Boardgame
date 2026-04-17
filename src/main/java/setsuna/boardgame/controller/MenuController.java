@@ -19,12 +19,9 @@ import setsuna.boardgame.model.games.Games;
 import setsuna.boardgame.utils.CustomAlert;
 import setsuna.boardgame.utils.ViewChanger;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-public class MenuController implements ControllerInterface{
+public class MenuController implements IController{
     @FXML
     private FlowPane gameSelectionPane;
 
@@ -183,7 +180,7 @@ public class MenuController implements ControllerInterface{
         private static void createLocalTicTacToe(FXMLLoader loader, Player firstPlayer, Player secondPlayer, int size){
             //Créer la grille et ajoute les joueurs
             try{
-                GameControllerInterface controller=loader.getController();
+                IGameController controller=loader.getController();
 
                 List<Player> players=List.of(firstPlayer, secondPlayer);
                 controller.createOfflineGameInterface(players, size);
@@ -210,7 +207,7 @@ public class MenuController implements ControllerInterface{
                         if(roomId!=-1){
                             Platform.runLater(() -> {
                                 FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
-                                GameControllerInterface controller=loader.getController();
+                                IGameController controller=loader.getController();
                                 controller.createOnlineGameInterface(roomId);
                             });
                         }
@@ -245,7 +242,7 @@ public class MenuController implements ControllerInterface{
                         if(isJoin){
                             Platform.runLater(() -> {
                                 FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
-                                GameControllerInterface controller=loader.getController();
+                                IGameController controller=loader.getController();
                                 controller.createOnlineGameInterface(roomId);
                             });
                         }

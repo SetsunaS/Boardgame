@@ -8,7 +8,7 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import setsuna.boardgame.GameApplication;
-import setsuna.boardgame.controller.ControllerInterface;
+import setsuna.boardgame.controller.IController;
 import setsuna.boardgame.utils.network.NetworkManager;
 import setsuna.boardgame.model.games.Games;
 import setsuna.boardgame.model.general.player.Player;
@@ -40,7 +40,7 @@ public class ViewChanger{
             //Changement de scène
             currentScene.setRoot(loader.load());
 
-            ControllerInterface controllerInterface=loader.getController();
+            IController controllerInterface=loader.getController();
             controllerInterface.setCurrentPlayer(player);
             controllerInterface.setNetworkManager(networkManager);
 
