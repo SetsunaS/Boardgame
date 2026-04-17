@@ -1,5 +1,6 @@
 package setsuna.boardgame.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,7 +18,11 @@ import setsuna.boardgame.model.general.player.ai.TicTacToeAiPlayer;
 import setsuna.boardgame.model.games.Games;
 import setsuna.boardgame.utils.CustomAlert;
 import setsuna.boardgame.utils.ViewChanger;
+
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MenuController implements ControllerInterface{
     @FXML
@@ -178,7 +183,7 @@ public class MenuController implements ControllerInterface{
         private static void createLocalTicTacToe(FXMLLoader loader, Player firstPlayer, Player secondPlayer, int size){
             //Créer la grille et ajoute les joueurs
             try{
-                TicTacToeController controller=loader.getController();
+                GameControllerInterface controller=loader.getController();
 
                 List<Player> players=List.of(firstPlayer, secondPlayer);
                 controller.createOfflineGameInterface(players, size);
@@ -195,15 +200,26 @@ public class MenuController implements ControllerInterface{
                 networkManager.connectToServer();
                 networkManager.sendMessageToServer(Commands.CREATE_ROOM+" "+selectedGame+" "+size+" "+currentPlayer.getName());
 
-                //Réception de la réponse du serveur
-                int roomId=Integer.parseInt(networkManager.receiveMessageFromServer());
+                new Thread(() -> {
+                    try{
+                        String input=networkManager.receiveMessageFromServer();
+                        String[] message=input.split(" ");
+                        int roomId=Integer.parseInt(message[1]);
 
-                //Création du plateau de jeu
-                if(roomId!=-1){
-                    FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
-                    TicTacToeController controller=loader.getController();
-                    controller.createOnlineGameInterface(roomId);
-                }
+                        //Création du plateau de jeu
+                        if(roomId!=-1){
+                            Platform.runLater(() -> {
+                                FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
+                                GameControllerInterface controller=loader.getController();
+                                controller.createOnlineGameInterface(roomId);
+                            });
+                        }
+                    }
+                    catch(InterruptedException e){
+                        e.printStackTrace();
+                        System.out.println("Catch interruption.");
+                    }
+                }).start();
             }
             catch(Exception e){
                 e.printStackTrace();
@@ -219,19 +235,30 @@ public class MenuController implements ControllerInterface{
                 networkManager.connectToServer();
                 networkManager.sendMessageToServer(Commands.JOIN_ROOM+" "+roomId+" "+selectedGame+" "+currentPlayer.getName());
 
-                //Réception de la réponse du serveur
-                boolean isJoin=Boolean.parseBoolean(networkManager.receiveMessageFromServer());
+                new Thread(() -> {
+                    try{
+                        String input=networkManager.receiveMessageFromServer();
+                        String[] message=input.split(" ");
+                        boolean isJoin=Boolean.parseBoolean(message[1]);
 
-                //Création du plateau de jeu
-                if(isJoin){
-                    FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
-                    TicTacToeController controller=loader.getController();
-                    controller.createOnlineGameInterface(roomId);
-                }
-                else{
-                    joinErrorMessageLabel.setText(Constants.ERROR_MESSAGE_JOIN_ROOM);
-                    joinErrorMessageLabel.setVisible(true);
-                }
+                        //Création du plateau de jeu
+                        if(isJoin){
+                            Platform.runLater(() -> {
+                                FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
+                                GameControllerInterface controller=loader.getController();
+                                controller.createOnlineGameInterface(roomId);
+                            });
+                        }
+                        else{
+                            joinErrorMessageLabel.setText(Constants.ERROR_MESSAGE_JOIN_ROOM);
+                            joinErrorMessageLabel.setVisible(true);
+                        }
+                    }
+                    catch(InterruptedException e){
+                        e.printStackTrace();
+                        System.out.println("Catch interruption.");
+                    }
+                }).start();
             }
             catch(Exception e){
                 e.printStackTrace();

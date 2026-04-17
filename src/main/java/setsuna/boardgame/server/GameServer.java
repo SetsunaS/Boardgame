@@ -16,6 +16,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
 public class GameServer{
     private ServerSocket serverSocket;
     private final GameLobby gameLobby;
@@ -57,7 +58,7 @@ public class GameServer{
             String inputLine;
             String[] message;
             while((inputLine=in.readLine())!=null){
-                System.out.println(inputLine);
+                System.out.println("input : "+inputLine);
 
                 message=inputLine.split(" ");
                 switch(Commands.valueOf(message[0])){
@@ -67,10 +68,10 @@ public class GameServer{
                         String hostName=message[3];
 
                         int roomId=gameLobby.createRoom(getGameModel(game, gameSize), hostName, out);
-                        out.println(roomId);
+                        out.println(Commands.CREATE_ROOM+" "+roomId);
 
                         //Réponse à IS_ROOM_FULL
-                        gameLobby.broadcast(roomId, gameLobby.isRoomFull(roomId));
+                        gameLobby.broadcast(roomId, Commands.IS_ROOM_FULL+" "+gameLobby.isRoomFull(roomId));
                         break;
                     }
 
@@ -80,10 +81,10 @@ public class GameServer{
                         String playerName=message[3];
 
                         boolean isJoin=gameLobby.joinRoom(roomId, selectedGame, playerName, out);
-                        out.println(isJoin);
+                        out.println(Commands.JOIN_ROOM+" "+isJoin);
 
                         //Réponse à IS_ROOM_FULL
-                        if(isJoin) gameLobby.broadcast(roomId, gameLobby.isRoomFull(roomId));
+                        if(isJoin) gameLobby.broadcast(roomId, Commands.IS_ROOM_FULL+" "+gameLobby.isRoomFull(roomId));
                         break;
                     }
 
@@ -96,7 +97,7 @@ public class GameServer{
                         int roomId=Integer.parseInt(message[1]);
 
                         String currentPlayerName=gameLobby.getPlayerName(roomId);
-                        out.println(currentPlayerName);
+                        out.println(Commands.GET_PLAYER_NAME+" "+currentPlayerName);
                         break;
                     }
 
@@ -104,7 +105,7 @@ public class GameServer{
                         int roomId=Integer.parseInt(message[1]);
 
                         int size=gameLobby.getBoardSize(roomId);
-                        out.println(size);
+                        out.println(Commands.GET_BOARD_SIZE+" "+size);
                         break;
                     }
 
@@ -115,8 +116,8 @@ public class GameServer{
                         int w=Integer.parseInt(message[4]);
 
                         String playRes=gameLobby.play(playerName, roomId, h, w);
-                        if(playRes.equals("false")) out.println(playRes);
-                        else gameLobby.broadcast(roomId, playRes);
+                        if(playRes.equals("false")) out.println(Commands.PLAY+" "+playRes);
+                        else gameLobby.broadcast(roomId, Commands.PLAY+" "+playRes);
                         break;
                     }
 
@@ -125,7 +126,7 @@ public class GameServer{
                         String playerName=message[2];
 
                         String isGameOverRes=gameLobby.isGameOver(roomId, playerName);
-                        out.println(isGameOverRes);
+                        out.println(Commands.IS_GAME_OVER+" "+isGameOverRes);
                         break;
                     }
 
@@ -134,7 +135,7 @@ public class GameServer{
                         String playerName=message[2];
 
                         boolean giveUpRes=gameLobby.giveUp(roomId, playerName);
-                        out.println(giveUpRes);
+                        out.println(Commands.GIVE_UP+" "+giveUpRes);
                         break;
                     }
 

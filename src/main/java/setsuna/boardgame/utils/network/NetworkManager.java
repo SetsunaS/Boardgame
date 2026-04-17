@@ -6,16 +6,40 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class NetworkManager{
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
 
+    private volatile boolean isRunning=true;
+    private BlockingQueue<String> messageQueue=new LinkedBlockingQueue<>();
+
     public void connectToServer() throws IOException{
         this.socket=new Socket(Constants.SERVER_HOST, Constants.SERVER_PORT);
         this.in=new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.out=new PrintWriter(socket.getOutputStream(), true);
+
+        listeningMessageFromServer();
+    }
+
+    private void listeningMessageFromServer(){
+        new Thread(() -> {
+            try{
+                String message;
+                while(isRunning && (message=in.readLine())!=null){
+                    messageQueue.put(message);
+                }
+            }
+            catch(IOException e){
+                System.out.println("Error while receiving message.");
+            }
+            catch(InterruptedException e){
+                System.out.println("Error while putting received message in the queue.");
+            }
+        }).start();
     }
 
     public void sendMessageToServer(String message){
@@ -23,20 +47,16 @@ public class NetworkManager{
         if(out!=null) out.println(message);
     }
 
-    public String receiveMessageFromServer() throws IOException{
-        if(in!=null){
-            String res=in.readLine();
-            System.out.println("received message from server : "+res);
-            return res;
-        }
-        return null;
+    public String receiveMessageFromServer() throws InterruptedException{
+        return messageQueue.take();
     }
 
     public void closeConnection(){
         try{
-            if(socket!=null) socket.close();
-            if(in!=null) in.close();
+            isRunning=false;
             if(out!=null) out.close();
+            if(in!=null) in.close();
+            if(socket!=null) socket.close();
         }
         catch(IOException e){
             e.printStackTrace();
