@@ -201,9 +201,8 @@ public class MenuController implements IController{
                     try{
                         String input=networkManager.receiveMessageFromServer();
                         String[] message=input.split(" ");
+                        
                         int roomId=Integer.parseInt(message[1]);
-
-                        //Création du plateau de jeu
                         if(roomId!=-1){
                             Platform.runLater(() -> {
                                 FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
@@ -236,9 +235,8 @@ public class MenuController implements IController{
                     try{
                         String input=networkManager.receiveMessageFromServer();
                         String[] message=input.split(" ");
-                        boolean isJoin=Boolean.parseBoolean(message[1]);
 
-                        //Création du plateau de jeu
+                        boolean isJoin=Boolean.parseBoolean(message[1]);
                         if(isJoin){
                             Platform.runLater(() -> {
                                 FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
@@ -247,8 +245,10 @@ public class MenuController implements IController{
                             });
                         }
                         else{
-                            joinErrorMessageLabel.setText(Constants.ERROR_MESSAGE_JOIN_ROOM);
-                            joinErrorMessageLabel.setVisible(true);
+                            Platform.runLater(() -> {
+                                joinErrorMessageLabel.setText(Constants.ERROR_MESSAGE_JOIN_ROOM);
+                                joinErrorMessageLabel.setVisible(true);
+                            });
                         }
                     }
                     catch(InterruptedException e){

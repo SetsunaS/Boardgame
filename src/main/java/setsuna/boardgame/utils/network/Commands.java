@@ -30,7 +30,6 @@ public enum Commands{
     IS_GAME_OVER,
 
     //Client : (Commands)GIVE_UP (int)roomId (String)playerName
-    //Serveur : (Commands)GIVE_UP (boolean)isGiveUp
-    //TODO
+    //Serveur : (Commands)GIVE_UP (boolean)playerName
     GIVE_UP
 }

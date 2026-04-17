@@ -157,7 +157,7 @@ public class TicTacToeController implements IController, IGameController{
         Thread update=new Thread(() -> {
             String message;
             try{
-                while(true){
+                while(networkManager.getIsRunning()){
                     message=networkManager.receiveMessageFromServer();
                     if(message!=null) handleServerMessage(message);
                 }
@@ -252,15 +252,15 @@ public class TicTacToeController implements IController, IGameController{
                         new HumanPlayer(winner).addScore(10);
                     }
                     Platform.runLater(this::showWinner);
+                    networkManager.closeConnection();
                 }
                 else networkManager.sendMessageToServer(Commands.GET_PLAYER_NAME+" "+roomId);
                 break;
             }
 
             case GIVE_UP: {
-                //TODO
-                boolean isGiveUp=Boolean.parseBoolean(message[1]);
-
+                String playerName=message[1];
+                networkManager.sendMessageToServer(Commands.IS_GAME_OVER+" "+roomId+" "+playerName);
                 break;
             }
 

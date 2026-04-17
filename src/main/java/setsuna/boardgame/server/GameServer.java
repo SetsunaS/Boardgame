@@ -135,7 +135,7 @@ public class GameServer{
                         String playerName=message[2];
 
                         boolean giveUpRes=gameLobby.giveUp(roomId, playerName);
-                        out.println(Commands.GIVE_UP+" "+giveUpRes);
+                        if(giveUpRes) gameLobby.broadcast(roomId, Commands.GIVE_UP+" "+playerName);
                         break;
                     }
 

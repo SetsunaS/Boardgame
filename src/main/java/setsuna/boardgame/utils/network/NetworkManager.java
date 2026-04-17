@@ -14,10 +14,11 @@ public class NetworkManager{
     private BufferedReader in;
     private PrintWriter out;
 
-    private volatile boolean isRunning=true;
+    private volatile boolean isRunning=false;
     private BlockingQueue<String> messageQueue=new LinkedBlockingQueue<>();
 
     public void connectToServer() throws IOException{
+        isRunning=true;
         this.socket=new Socket(Constants.SERVER_HOST, Constants.SERVER_PORT);
         this.in=new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.out=new PrintWriter(socket.getOutputStream(), true);
@@ -34,7 +35,10 @@ public class NetworkManager{
                 }
             }
             catch(IOException e){
-                System.out.println("Error while receiving message.");
+                if(isRunning){
+                    e.printStackTrace();
+                    System.out.println("Error while receiving message.");
+                }
             }
             catch(InterruptedException e){
                 System.out.println("Error while putting received message in the queue.");
@@ -49,6 +53,10 @@ public class NetworkManager{
 
     public String receiveMessageFromServer() throws InterruptedException{
         return messageQueue.take();
+    }
+
+    public boolean getIsRunning(){
+        return isRunning;
     }
 
     public void closeConnection(){
