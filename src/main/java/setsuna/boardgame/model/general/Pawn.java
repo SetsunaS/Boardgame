@@ -12,4 +12,13 @@ public enum Pawn{
     public String toString(){
         return Character.toString(symbol);
     }
+
+    public static Pawn toPawn(String symbol){
+        switch(symbol.charAt(0)){
+            case '_': return EMPTY;
+            case 'X': return CROSS;
+            case 'O': return CIRCLE;
+            default: return null;
+        }
+    }
 }

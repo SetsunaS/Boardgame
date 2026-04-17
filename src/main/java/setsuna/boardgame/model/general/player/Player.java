@@ -1,6 +1,6 @@
 package setsuna.boardgame.model.general.player;
 
-import setsuna.boardgame.database.DatabaseManager;
+import setsuna.boardgame.utils.database.DatabaseManager;
 import setsuna.boardgame.model.games.TicTacToe;
 import setsuna.boardgame.model.general.Pawn;
 

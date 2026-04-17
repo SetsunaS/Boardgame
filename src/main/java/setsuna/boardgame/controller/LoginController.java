@@ -2,20 +2,24 @@ package setsuna.boardgame.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import setsuna.boardgame.database.DatabaseManager;
+import javafx.scene.control.*;
+import setsuna.boardgame.utils.network.NetworkManager;
+import setsuna.boardgame.utils.database.DatabaseManager;
 import setsuna.boardgame.model.general.player.HumanPlayer;
 import setsuna.boardgame.model.general.player.Player;
 import setsuna.boardgame.utils.Constants;
 import setsuna.boardgame.utils.ViewChanger;
 import setsuna.boardgame.utils.password.PasswordCrypt;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LoginController implements GameController{
+public class LoginController implements IController{
+    @FXML
+    private TabPane tabPane;
+
+    @FXML
+    private Tab loginTab;
+
     @FXML
     private TextField loginUsernameTextField;
 
@@ -24,6 +28,12 @@ public class LoginController implements GameController{
 
     @FXML
     private Label loginErrorMessageLabel;
+
+    @FXML
+    private Button loginButton;
+
+    @FXML
+    private Tab registerTab;
 
     @FXML
     private TextField registerUsernameTextField;
@@ -40,11 +50,35 @@ public class LoginController implements GameController{
     @FXML
     private Label registerErrorMessageLabel;
 
+    @FXML
+    private Button registerButton;
+
     private Player currentPlayer;
+    private NetworkManager networkManager;
 
     @Override
     public void setCurrentPlayer(Player player){
         currentPlayer=player;
+    }
+
+    @Override
+    public void setNetworkManager(NetworkManager networkManager){
+        this.networkManager=networkManager;
+    }
+
+    public void initialize(){
+        tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
+            if(newTab==loginTab){
+                registerButton.setDefaultButton(false);
+                loginButton.setDefaultButton(true);
+            }
+            else if(newTab==registerTab){
+                loginButton.setDefaultButton(false);
+                registerButton.setDefaultButton(true);
+            }
+        });
+
+        loginButton.setDefaultButton(true);
     }
 
     public void login(ActionEvent actionEvent){
@@ -58,7 +92,7 @@ public class LoginController implements GameController{
 
             //Vérifie si username/email n'est pas dans la base de données
             if(!DatabaseManager.isUsernameInDatabase(username)){
-                setAndDisplayErrorMessage(loginErrorMessageLabel, Constants.errorMessageLoginPasswordDontMatch);
+                setAndDisplayErrorMessage(loginErrorMessageLabel, Constants.ERROR_MESSAGE_LOGIN_PASSWORD_DONT_MATCH);
             }
 
             else{
@@ -70,14 +104,17 @@ public class LoginController implements GameController{
                 //Vérifie le couple username/email & mot de passe
                 if(!PasswordCrypt.checkPassword(loginPasswordField.getText(), DatabaseManager.getPlayerHashedPasword(username))){
                     //Affiche une erreur
-                    setAndDisplayErrorMessage(loginErrorMessageLabel, Constants.errorMessageLoginPasswordDontMatch);
+                    setAndDisplayErrorMessage(loginErrorMessageLabel, Constants.ERROR_MESSAGE_LOGIN_PASSWORD_DONT_MATCH);
                 }
                 else{
                     //Création du Player
                     setCurrentPlayer(new HumanPlayer(username, DatabaseManager.getScore(username)));
 
+                    //Création du canal de communication
+                    setNetworkManager(new NetworkManager());
+
                     //Changement de scène pour aller au menu des jeux
-                    ViewChanger.changeSceneToMenu(actionEvent, currentPlayer);
+                    ViewChanger.changeSceneToMenu(actionEvent, currentPlayer, networkManager);
                 }
             }
         }
@@ -109,8 +146,11 @@ public class LoginController implements GameController{
                         //Création du Player
                         setCurrentPlayer(new HumanPlayer(registerUsernameTextField.getText()));
 
+                        //Création du canal de communication
+                        setNetworkManager(new NetworkManager());
+
                         //Changement de scène pour aller au menu des jeux
-                        ViewChanger.changeSceneToMenu(actionEvent, currentPlayer);
+                        ViewChanger.changeSceneToMenu(actionEvent, currentPlayer, networkManager);
                     }
                 }
             }
@@ -124,8 +164,13 @@ public class LoginController implements GameController{
     private static boolean isValidUsername(TextField usernameTextField, Label errorMessageLabel){
         String username=usernameTextField.getText();
 
+        if(!username.matches("[a-zA-Z0-9]+") || username.equals("null")){
+            setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_USERNAME_NOT_VALID);
+            return false;
+        }
+
         if(DatabaseManager.usernameAlreadyTaken(username)){
-            setAndDisplayErrorMessage(errorMessageLabel, Constants.errorMessageUsernameAlreadyTaken);
+            setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_USERNAME_ALREADY_TAKEN);
             return false;
         }
 
@@ -139,11 +184,11 @@ public class LoginController implements GameController{
         Matcher matcher=pattern.matcher(email);
 
         if(!matcher.matches()){
-            setAndDisplayErrorMessage(errorMessageLabel, Constants.errorMessageEmailNotValid);
+            setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_EMAIL_NOT_VALID);
             return false;
         }
         if(DatabaseManager.emailAlreadyTaken(email)){
-            setAndDisplayErrorMessage(errorMessageLabel, Constants.errorMessageEmailAlreadyTaken);
+            setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_EMAIL_ALREADY_TAKEN);
             return false;
         }
 
@@ -154,17 +199,17 @@ public class LoginController implements GameController{
         String password=passwordField.getText();
 
         if(isTooShort(password)){
-            setAndDisplayErrorMessage(errorMessageLabel, Constants.errorMessagePasswordTooShort);
+            setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_PASSWORD_TOO_SHORT);
             return false;
         }
 
         if(!containsUpperCharacter(password)){
-            setAndDisplayErrorMessage(errorMessageLabel, Constants.errorMessagePasswordWithoutUpperCharacter);
+            setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_PASSWORD_WITHOUT_UPPER_CHARACTER);
             return false;
         }
 
         if(!containsDigit(password)){
-            setAndDisplayErrorMessage(errorMessageLabel, Constants.errorMessagePasswordWithoutDigit);
+            setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_PASSWORD_WITHOUT_DIGIT);
             return false;
         }
 
@@ -189,7 +234,7 @@ public class LoginController implements GameController{
 
     private static boolean isSamePassword(PasswordField passwordField, PasswordField secondPasswordField, Label registerErrorMessageLabel){
         if(!passwordField.getText().equals(secondPasswordField.getText())){
-            setAndDisplayErrorMessage(registerErrorMessageLabel, Constants.errorMessagePasswordsDontMatch);
+            setAndDisplayErrorMessage(registerErrorMessageLabel, Constants.ERROR_MESSAGE_PASSWORDS_DONT_MATCH);
             return false;
         }
         return true;

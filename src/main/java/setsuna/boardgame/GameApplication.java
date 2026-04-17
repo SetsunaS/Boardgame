@@ -3,7 +3,6 @@ package setsuna.boardgame;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import setsuna.boardgame.utils.ViewChanger;
-
 import java.io.IOException;
 
 public class GameApplication extends Application{
@@ -11,6 +10,9 @@ public class GameApplication extends Application{
     public void start(Stage stage) throws IOException{
         stage.setMaximized(true);
         stage.setTitle("Boardgame");
+
+        stage.setMinWidth(500);
+        stage.setMinHeight(500);
 
         stage.setScene(ViewChanger.createLoginScene());
         stage.show();

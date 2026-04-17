@@ -7,8 +7,12 @@ import setsuna.boardgame.model.general.exception.PlayerFullException;
 import setsuna.boardgame.model.general.exception.InvalidMoveException;
 import setsuna.boardgame.model.general.player.Player;
 
-public class TicTacToe implements Cloneable{
-    private Player[] players=new Player[2];
+public class TicTacToe implements GameModel, Cloneable{
+    private static final Games selectedGame=Games.TIC_TAC_TOE;
+
+    public static final int MAX_PLAYERS_NUMBER=2;
+    private Player[] players;
+
     private Board board;
 
     private int currentPlayer=0;
@@ -17,7 +21,8 @@ public class TicTacToe implements Cloneable{
 
 
     /* Création d'un plateau de jeu */
-    private TicTacToe(Player player0, Player player1, int boardSize){
+    public TicTacToe(Player player0, Player player1, int boardSize){
+        players=new Player[MAX_PLAYERS_NUMBER];
         players[0]=player0;
         players[1]=player1;
         this.board=new Board(boardSize);
@@ -31,14 +36,57 @@ public class TicTacToe implements Cloneable{
         this(3);
     }
 
+    @Override
+    public boolean isSelectedGame(Games selectedGame){
+        return selectedGame==TicTacToe.selectedGame;
+    }
+
+    @Override
+    public boolean canAddPlayer(){
+        return players[0]==null || players[1]==null;
+    }
+
+    @Override
+    public int getMaxPlayersNumber(){
+        return MAX_PLAYERS_NUMBER;
+    }
+
+    @Override
+    public int getCurrentPlayerNumber(){
+        int playerNumber=0;
+        if(players[0]!=null) playerNumber++;
+        if(players[1]!=null) playerNumber++;
+        return playerNumber;
+    }
+
+    @Override
     public void addPlayer(Player player) throws PlayerFullException{
         if(players[0]==null) players[0]=player;
         else if(players[1]==null) players[1]=player;
         else throw new PlayerFullException();
     }
 
+    @Override
+    public boolean removePlayer(Player player){
+        if(players[0]==player){
+            players[0]=null;
+            return true;
+        }
+        if(players[1]==player){
+            players[1]=null;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canBeClose(){
+        return isGameOver && players[0]==null && players[1]==null;
+    }
+
 
     /* Joueur courant */
+    @Override
     public Player getCurrentPlayer(){
         if(currentPlayer==0) return players[0];
         if(currentPlayer==1) return players[1];
@@ -56,12 +104,40 @@ public class TicTacToe implements Cloneable{
 
 
     /* Placement des pions */
+    @Override
+    public int getBoardSize(){
+        return board.getSize();
+    }
+
+    @Override
+    public boolean isValidMove(int h, int w){
+        return !isGameOver && board.isInBounds(h, w) && board.isEmpty(h, w);
+    }
+
     private void oneMove(int h, int w, Pawn pawnToSet) throws InvalidMoveException{
         //Vérification de la légalité du mouvement
-        if(isGameOver || !board.isInBounds(h, w) || !board.isEmpty(h, w)) throw new InvalidMoveException();
+        if(!isValidMove(h, w)) throw new InvalidMoveException();
 
         //Placer le pion
         board.setPawn(pawnToSet, h, w);
+    }
+
+
+    /* Enchainement d'un tour */
+    @Override
+    public Pawn play(int h, int w) throws InvalidMoveException{
+        Pawn pawn=(currentPlayer==0)? Pawn.CIRCLE : Pawn.CROSS;
+        oneMove(h, w, pawn);
+        lastPosition.setPosition(h, w);
+
+        //Vérifie si une partie est finie ou non
+        checkGameOver(h, w, pawn);
+
+        //Si non, on change de joueur pour continuer
+        if(!isGameOver) changeCurrentPlayer();
+
+        //Retourne la pièce jouée
+        return pawn;
     }
 
 
@@ -70,6 +146,7 @@ public class TicTacToe implements Cloneable{
         isGameOver=true;
     }
 
+    @Override
     public boolean isGameOver(){
         return isGameOver;
     }
@@ -117,27 +194,21 @@ public class TicTacToe implements Cloneable{
         }
     }
 
+    @Override
     public Player getWinner(){
         if(currentPlayer==0) return players[0];
         if(currentPlayer==1) return players[1];
         return null;
     }
 
+    @Override
+    public boolean giveUp(String playerName){
+        if(players[0].getName().equals(playerName)) currentPlayer=1;
+        else if(players[1].getName().equals(playerName)) currentPlayer=0;
+        else return false;
 
-    /* Enchainement d'un tour */
-    public Pawn play(int h, int w) throws InvalidMoveException{
-        Pawn pawn=(currentPlayer==0)? Pawn.CIRCLE : Pawn.CROSS;
-        oneMove(h, w, pawn);
-        lastPosition.setPosition(h, w);
-
-        //Vérifie si une partie est finie ou non
-        checkGameOver(h, w, pawn);
-
-        //Si non, on change de joueur pour continuer
-        if(!isGameOver) changeCurrentPlayer();
-
-        //Retourne la pièce jouée
-        return pawn;
+        setGameOver();
+        return true;
     }
 
     public int getLastHPlayed(){
@@ -169,13 +240,5 @@ public class TicTacToe implements Cloneable{
             e.printStackTrace();
             return null;
         }
-    }
-
-    public int getBoardSize(){
-        return board.getSize();
-    }
-
-    public boolean isValidMove(int h, int w){
-        return board.isEmpty(h, w);
     }
 }

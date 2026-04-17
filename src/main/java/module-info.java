@@ -6,7 +6,7 @@ module setsuna.boardgame{
 
     opens setsuna.boardgame to javafx.fxml;
     opens setsuna.boardgame.controller to javafx.fxml;
-    opens setsuna.boardgame.database to javafx.fxml;
+    opens setsuna.boardgame.utils.database to javafx.fxml;
     opens setsuna.boardgame.model.games to javafx.fxml;
     opens setsuna.boardgame.model.general to javafx.fxml;
     opens setsuna.boardgame.model.general.exception to javafx.fxml;
@@ -15,7 +15,7 @@ module setsuna.boardgame{
 
     exports setsuna.boardgame;
     exports setsuna.boardgame.controller;
-    exports setsuna.boardgame.database;
+    exports setsuna.boardgame.utils.database;
     exports setsuna.boardgame.model.games;
     exports setsuna.boardgame.model.general;
     exports setsuna.boardgame.model.general.exception;
@@ -23,4 +23,8 @@ module setsuna.boardgame{
     exports setsuna.boardgame.utils.password;
     exports setsuna.boardgame.model.general.player;
     opens setsuna.boardgame.model.general.player to javafx.fxml;
+    exports setsuna.boardgame.utils.network;
+    opens setsuna.boardgame.utils.network to javafx.fxml;
+    exports setsuna.boardgame.server;
+    opens setsuna.boardgame.server to javafx.fxml;
 }
