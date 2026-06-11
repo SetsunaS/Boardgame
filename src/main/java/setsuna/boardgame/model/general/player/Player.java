@@ -1,13 +1,11 @@
 package setsuna.boardgame.model.general.player;
 
-import setsuna.boardgame.utils.database.DatabaseManager;
-import setsuna.boardgame.model.games.TicTacToe;
-import setsuna.boardgame.model.general.Pawn;
+import setsuna.boardgame.model.games.GameModel;
 
 public abstract class Player{
     private String name;
     private int score;
-    protected TicTacToe game;
+    protected GameModel game;
 
 
     /* Création d'un joueur */
@@ -30,14 +28,11 @@ public abstract class Player{
     /* Score */
     public void addScore(int scoreToAdd){
         this.score+=scoreToAdd;
-        DatabaseManager.updatePlayerScore(name, score);
     }
 
 
-    /* Jouer */
-    public abstract Pawn play();
-
-    public void setGame(TicTacToe game){
+    /* Jeu courant */
+    public void setGame(GameModel game){
         this.game=game;
     }
 

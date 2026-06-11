@@ -8,9 +8,11 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import setsuna.boardgame.model.general.player.HumanPlayer;
+import setsuna.boardgame.utils.database.DatabaseManager;
 import setsuna.boardgame.utils.network.Commands;
+import setsuna.boardgame.utils.network.GameClientListener;
 import setsuna.boardgame.utils.network.NetworkManager;
+import setsuna.boardgame.utils.network.ServerMessageHandler;
 import setsuna.boardgame.model.general.player.Player;
 import setsuna.boardgame.model.general.player.ai.TicTacToeAiPlayer;
 import setsuna.boardgame.model.games.TicTacToe;
@@ -22,7 +24,7 @@ import setsuna.boardgame.utils.ViewChanger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TicTacToeController implements IController, IGameController{
+public class TicTacToeController implements IController, IGameController, GameClientListener{
     @FXML
     private StackPane rootPane;
 
@@ -153,13 +155,16 @@ public class TicTacToeController implements IController, IGameController{
         this.isOnline=true;
         this.roomId=roomId;
 
+        //Interprétation des messages du serveur, déléguée pour être testable sans interface
+        ServerMessageHandler handler=new ServerMessageHandler(networkManager, this, currentPlayer.getName(), roomId);
+
         //Communication avec le serveur
         Thread update=new Thread(() -> {
             String message;
             try{
                 while(networkManager.getIsRunning()){
                     message=networkManager.receiveMessageFromServer();
-                    if(message!=null) handleServerMessage(message);
+                    if(message!=null) handler.handleServerMessage(message);
                 }
             }
             catch(InterruptedException e){
@@ -172,100 +177,55 @@ public class TicTacToeController implements IController, IGameController{
         networkManager.sendMessageToServer(Commands.GET_BOARD_SIZE+" "+roomId);
     }
 
-    private void handleServerMessage(String input){
-        System.out.println("received message from server : "+input);
 
-        String[] message=input.split(" ");
-        switch(Commands.valueOf(message[0])){
-            case CREATE_ROOM: {
-                //Déjà géré dans MenuController
-                break;
+    /** Réactions de l'interface aux messages du serveur **/
+    @Override
+    public void onRoomWaiting(int currentPlayerNumber, int maxPlayersNumber){
+        Platform.runLater(() -> roomIdLabel.setText("Room: "+roomId+" - "+currentPlayerNumber+"/"+maxPlayersNumber+" players"));
+    }
+
+    @Override
+    public void onRoomFull(){
+        Platform.runLater(() -> roomIdLabel.setText("Room: "+roomId));
+    }
+
+    @Override
+    public void onCurrentPlayer(String playerName, boolean isMyTurn){
+        Platform.runLater(() -> {
+            playerNameLabel.setText("Current player is "+playerName);
+            if(isMyTurn) enableButtons();
+        });
+    }
+
+    @Override
+    public void onBoardCreation(int boardSize){
+        Platform.runLater(() -> {
+            createBoard(boardSize);
+            disableButtons();
+        });
+    }
+
+    @Override
+    public void onMovePlayed(Pawn pawn, int h, int w, int boardSize){
+        Platform.runLater(() -> {
+            disableButtons();
+            updateButton(getButton(h, w, boardSize), pawn);
+        });
+    }
+
+    @Override
+    public void onGameOver(String winner, boolean isWinner){
+        if(winner==null) Platform.runLater(() -> gameWinnerLabel.setText("Draw"));
+        else{
+            Platform.runLater(() -> gameWinnerLabel.setText("Winner is player "+winner));
+
+            //Seul le client gagnant met à jour son score, sinon les deux clients l'ajoutent
+            if(isWinner){
+                currentPlayer.addScore(10);
+                DatabaseManager.updatePlayerScore(currentPlayer.getName(), currentPlayer.getScore());
             }
-
-            case JOIN_ROOM: {
-                //Déjà géré dans MenuController
-                break;
-            }
-
-            case IS_ROOM_FULL: {
-                //Affichage du nombre de joueurs dans la salle
-                boolean isRoomFull=Boolean.parseBoolean(message[1]);
-                int currentPlayerNumber=Integer.parseInt(message[2]);
-                int maxPlayersNumber=Integer.parseInt(message[3]);
-
-                if(isRoomFull){
-                    Platform.runLater(() -> {
-                        roomIdLabel.setText("Room: "+roomId);
-                        networkManager.sendMessageToServer(Commands.GET_PLAYER_NAME+" "+roomId);
-                    });
-                }
-                else
-                    Platform.runLater(() -> roomIdLabel.setText("Room: "+roomId+" - "+currentPlayerNumber+"/"+maxPlayersNumber+" players"));
-                break;
-            }
-
-            case GET_PLAYER_NAME: {
-                String currentPlayerName=message[1];
-                Platform.runLater(() -> playerNameLabel.setText("Current player is "+currentPlayerName));
-                if(currentPlayerName.equals(currentPlayer.getName()))
-                    Platform.runLater(this::enableButtons);
-                break;
-            }
-
-            case GET_BOARD_SIZE: {
-                int boardSize=Integer.parseInt(message[1]);
-                if(boardSize>0){
-                    Platform.runLater(() -> {
-                        createBoard(boardSize);
-                        disableButtons();
-                    });
-                }
-                break;
-            }
-
-            case PLAY: {
-                boolean isValidMove=Boolean.parseBoolean(message[1]);
-                if(isValidMove){
-                    Pawn pawn=Pawn.toPawn(message[2]);
-                    int h=Integer.parseInt(message[3]);
-                    int w=Integer.parseInt(message[4]);
-                    int boardSize=Integer.parseInt(message[5]);
-
-                    Platform.runLater(() -> {
-                        disableButtons();
-                        updateButton(getButton(h, w, boardSize), pawn);
-                    });
-
-                    //Update winner
-                    networkManager.sendMessageToServer(Commands.IS_GAME_OVER+" "+roomId+" "+currentPlayer.getName());
-                }
-                break;
-            }
-
-            case IS_GAME_OVER: {
-                boolean isGameOver=Boolean.parseBoolean(message[1]);
-                if(isGameOver){
-                    String winner=message[2];
-                    if(winner.equals("null")) Platform.runLater(() -> gameWinnerLabel.setText("Draw"));
-                    else{
-                        Platform.runLater(() -> gameWinnerLabel.setText("Winner is player "+winner));
-                        new HumanPlayer(winner).addScore(10);
-                    }
-                    Platform.runLater(this::showWinner);
-                    networkManager.closeConnection();
-                }
-                else networkManager.sendMessageToServer(Commands.GET_PLAYER_NAME+" "+roomId);
-                break;
-            }
-
-            case GIVE_UP: {
-                String playerName=message[1];
-                networkManager.sendMessageToServer(Commands.IS_GAME_OVER+" "+roomId+" "+playerName);
-                break;
-            }
-
-            default:
         }
+        Platform.runLater(this::showWinner);
     }
 
 
@@ -286,6 +246,9 @@ public class TicTacToeController implements IController, IGameController{
             else{
                 gameWinnerLabel.setText("Winner is player "+winner.getName());
                 winner.addScore(10);
+
+                //Sauvegarde uniquement pour le compte connecté ("AI" et "X" n'existent pas en base)
+                if(winner==currentPlayer) DatabaseManager.updatePlayerScore(winner.getName(), winner.getScore());
             }
             showWinner();
         }
@@ -320,7 +283,7 @@ public class TicTacToeController implements IController, IGameController{
             for(int col=0; col<size; col++){
                 //Création des boutons
                 Button button=new Button();
-                button.setId("button"+row+col);
+                button.setId("button_"+row+"_"+col);
                 button.getStyleClass().add("gameButton");
                 button.setOnAction(this::onGridButtonClick);
 
@@ -355,11 +318,10 @@ public class TicTacToeController implements IController, IGameController{
 
     @FXML
     public void onGridButtonClick(ActionEvent actionEvent){
-        //Extraction du numéro de bouton au format buttonRowCol
         Button clickedButton=(Button)actionEvent.getSource();
-        String buttonID=clickedButton.getId();
-        int h=Character.getNumericValue(buttonID.charAt(6));
-        int w=Character.getNumericValue(buttonID.charAt(7));
+        String[] parts=clickedButton.getId().substring(7).split("_");
+        int h=Integer.parseInt(parts[0]);
+        int w=Integer.parseInt(parts[1]);
 
         if(isOnline) networkManager.sendMessageToServer(Commands.PLAY+" "+currentPlayer.getName()+" "+roomId+" "+h+" "+w);
         else{
@@ -370,10 +332,10 @@ public class TicTacToeController implements IController, IGameController{
                 updateWinner();
 
                 //Si l'adversaire est une ia
-                if(game.getCurrentPlayer() instanceof TicTacToeAiPlayer){
-                    pawn=game.getCurrentPlayer().play();
+                if(game.getCurrentPlayer() instanceof TicTacToeAiPlayer aiPlayer){
+                    pawn=aiPlayer.play();
 
-                    clickedButton=(Button)rootPane.lookup("#button"+game.getLastHPlayed()+game.getLastWPlayed());
+                    clickedButton=(Button)rootPane.lookup("#button_"+game.getLastHPlayed()+"_"+game.getLastWPlayed());
                     updateButton(clickedButton, pawn);
                     game.resetLastPosition();
 

@@ -18,6 +18,7 @@ public class TicTacToe implements GameModel, Cloneable{
     private int currentPlayer=0;
     private Position lastPosition=new Position();
     private boolean isGameOver=false;
+    private Player winner=null;
 
 
     /* Création d'un plateau de jeu */
@@ -68,11 +69,11 @@ public class TicTacToe implements GameModel, Cloneable{
 
     @Override
     public boolean removePlayer(Player player){
-        if(players[0]==player){
+        if(players[0]!=null && players[0].getName().equals(player.getName())){
             players[0]=null;
             return true;
         }
-        if(players[1]==player){
+        if(players[1]!=null && players[1].getName().equals(player.getName())){
             players[1]=null;
             return true;
         }
@@ -88,18 +89,12 @@ public class TicTacToe implements GameModel, Cloneable{
     /* Joueur courant */
     @Override
     public Player getCurrentPlayer(){
-        if(currentPlayer==0) return players[0];
-        if(currentPlayer==1) return players[1];
-        return null;
+        return players[currentPlayer];
     }
 
     private void changeCurrentPlayer(){
         if(currentPlayer==0) currentPlayer=1;
         else if(currentPlayer==1) currentPlayer=0;
-    }
-
-    private void setDraw(){
-        currentPlayer=2;
     }
 
 
@@ -146,6 +141,11 @@ public class TicTacToe implements GameModel, Cloneable{
         isGameOver=true;
     }
 
+    private void setWinnerAndGameOver(){
+        winner=players[currentPlayer];
+        setGameOver();
+    }
+
     @Override
     public boolean isGameOver(){
         return isGameOver;
@@ -158,7 +158,7 @@ public class TicTacToe implements GameModel, Cloneable{
         int currentScore=0;
         while(currentScore<maxScore && board.isPawn(h, currentScore, pawn)) currentScore++;
         if(currentScore==maxScore){
-            setGameOver();
+            setWinnerAndGameOver();
             return;
         }
 
@@ -166,7 +166,7 @@ public class TicTacToe implements GameModel, Cloneable{
         currentScore=0;
         while(currentScore<maxScore && board.isPawn(currentScore, w, pawn)) currentScore++;
         if(currentScore==maxScore){
-            setGameOver();
+            setWinnerAndGameOver();
             return;
         }
 
@@ -175,36 +175,31 @@ public class TicTacToe implements GameModel, Cloneable{
         if(h==w){
             while(currentScore<maxScore && board.isPawn(currentScore, currentScore, pawn)) currentScore++;
             if(currentScore==maxScore){
-                setGameOver();
+                setWinnerAndGameOver();
                 return;
             }
         }
         else if(h+w==maxScore-1){
             while(currentScore<maxScore && board.isPawn(currentScore, maxScore-currentScore-1, pawn)) currentScore++;
             if(currentScore==maxScore){
-                setGameOver();
+                setWinnerAndGameOver();
                 return;
             }
         }
 
         //Egalité
-        if(board.isFull()){
-            setGameOver();
-            setDraw();
-        }
+        if(board.isFull()) setGameOver();
     }
 
     @Override
     public Player getWinner(){
-        if(currentPlayer==0) return players[0];
-        if(currentPlayer==1) return players[1];
-        return null;
+        return winner;
     }
 
     @Override
     public boolean giveUp(String playerName){
-        if(players[0].getName().equals(playerName)) currentPlayer=1;
-        else if(players[1].getName().equals(playerName)) currentPlayer=0;
+        if(players[0]!=null && players[0].getName().equals(playerName)) winner=players[1];
+        else if(players[1]!=null && players[1].getName().equals(playerName)) winner=players[0];
         else return false;
 
         setGameOver();
@@ -233,7 +228,7 @@ public class TicTacToe implements GameModel, Cloneable{
 
             //Copie en profondeur des objets qu'il ne faut pas modifier dans la version originale
             clone.board=new Board(board);
-            lastPosition=new Position();
+            clone.lastPosition=new Position();
             return clone;
         }
         catch(CloneNotSupportedException e){

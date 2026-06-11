@@ -10,6 +10,7 @@ import setsuna.boardgame.model.general.player.Player;
 import setsuna.boardgame.utils.Constants;
 import setsuna.boardgame.utils.ViewChanger;
 import setsuna.boardgame.utils.password.PasswordCrypt;
+import setsuna.boardgame.utils.password.PasswordValidator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,7 +84,7 @@ public class LoginController implements IController{
 
     public void login(ActionEvent actionEvent){
         //Efface tout précédent message d'erreur affiché
-        hideErrorMessage(registerErrorMessageLabel);
+        hideErrorMessage(loginErrorMessageLabel);
 
         //Si tous les champs ne sont plus vides
         if(!isTextFieldEmpty(loginUsernameTextField) && !isTextFieldEmpty(loginPasswordField)){
@@ -196,40 +197,12 @@ public class LoginController implements IController{
     }
 
     private static boolean isStrongPassword(PasswordField passwordField, Label errorMessageLabel){
-        String password=passwordField.getText();
-
-        if(isTooShort(password)){
-            setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_PASSWORD_TOO_SHORT);
+        String error=PasswordValidator.getPasswordError(passwordField.getText());
+        if(error!=null){
+            setAndDisplayErrorMessage(errorMessageLabel, error);
             return false;
         }
-
-        if(!containsUpperCharacter(password)){
-            setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_PASSWORD_WITHOUT_UPPER_CHARACTER);
-            return false;
-        }
-
-        if(!containsDigit(password)){
-            setAndDisplayErrorMessage(errorMessageLabel, Constants.ERROR_MESSAGE_PASSWORD_WITHOUT_DIGIT);
-            return false;
-        }
-
         return true;
-    }
-
-    public static boolean isTooShort(String word){
-        return word.length()<7;
-    }
-
-    public static boolean containsUpperCharacter(String word){
-        for(int i=0; i<word.length(); i++)
-            if(Character.isUpperCase(word.charAt(i))) return true;
-        return false;
-    }
-
-    public static boolean containsDigit(String word){
-        for(int i=0; i<word.length(); i++)
-            if(Character.isDigit(word.charAt(i))) return true;
-        return false;
     }
 
     private static boolean isSamePassword(PasswordField passwordField, PasswordField secondPasswordField, Label registerErrorMessageLabel){

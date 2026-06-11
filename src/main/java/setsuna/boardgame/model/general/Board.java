@@ -33,7 +33,7 @@ public class Board{
     }
 
     public boolean isInBounds(int h, int w){
-        return w>=0 && w<board.length && h>=0 && h<board[0].length;
+        return h>=0 && h<board.length && w>=0 && w<board[0].length;
     }
 
     public boolean isEmpty(int h, int w){
