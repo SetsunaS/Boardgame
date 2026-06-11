@@ -83,7 +83,7 @@ public class LoginController implements IController{
 
     public void login(ActionEvent actionEvent){
         //Efface tout précédent message d'erreur affiché
-        hideErrorMessage(registerErrorMessageLabel);
+        hideErrorMessage(loginErrorMessageLabel);
 
         //Si tous les champs ne sont plus vides
         if(!isTextFieldEmpty(loginUsernameTextField) && !isTextFieldEmpty(loginPasswordField)){

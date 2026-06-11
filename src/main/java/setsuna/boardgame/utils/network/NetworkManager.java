@@ -18,8 +18,12 @@ public class NetworkManager{
     private BlockingQueue<String> messageQueue=new LinkedBlockingQueue<>();
 
     public void connectToServer() throws IOException{
+        connectToServer(Constants.SERVER_HOST, Constants.SERVER_PORT);
+    }
+
+    public void connectToServer(String host, int port) throws IOException{
         isRunning=true;
-        this.socket=new Socket(Constants.SERVER_HOST, Constants.SERVER_PORT);
+        this.socket=new Socket(host, port);
         this.in=new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.out=new PrintWriter(socket.getOutputStream(), true);
 

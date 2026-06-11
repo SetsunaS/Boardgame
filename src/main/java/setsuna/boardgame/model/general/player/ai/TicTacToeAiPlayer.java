@@ -17,7 +17,6 @@ public class TicTacToeAiPlayer extends Player{
         this(name, 0);
     }
 
-    @Override
     public Pawn play(){
         try{
             Position bestMove=findBestMove();
@@ -38,7 +37,7 @@ public class TicTacToeAiPlayer extends Player{
             for(int w=0; w<gameSize; w++){
                 if(game.isValidMove(h, w)){
                     try{
-                        TicTacToe gameCopy=(TicTacToe)super.game.clone();
+                        TicTacToe gameCopy=(TicTacToe)((TicTacToe)game).clone();
 
                         gameCopy.play(h, w);
                         score=minimax(gameCopy, 0, false, Integer.MIN_VALUE, Integer.MAX_VALUE);

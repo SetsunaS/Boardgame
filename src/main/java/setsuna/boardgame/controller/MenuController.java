@@ -10,8 +10,9 @@ import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import setsuna.boardgame.utils.Constants;
-import setsuna.boardgame.utils.network.Commands;
 import setsuna.boardgame.utils.network.NetworkManager;
+import setsuna.boardgame.utils.network.RoomConnectionListener;
+import setsuna.boardgame.utils.network.RoomConnector;
 import setsuna.boardgame.model.general.player.HumanPlayer;
 import setsuna.boardgame.model.general.player.Player;
 import setsuna.boardgame.model.general.player.ai.TicTacToeAiPlayer;
@@ -193,29 +194,8 @@ public class MenuController implements IController{
 
         private static void createNetworkTicTacToe(NetworkManager networkManager, Games selectedGame, int size, Player currentPlayer, ActionEvent actionEvent){
             try{
-                //Communication avec le serveur
-                networkManager.connectToServer();
-                networkManager.sendMessageToServer(Commands.CREATE_ROOM+" "+selectedGame+" "+size+" "+currentPlayer.getName());
-
-                new Thread(() -> {
-                    try{
-                        String input=networkManager.receiveMessageFromServer();
-                        String[] message=input.split(" ");
-                        
-                        int roomId=Integer.parseInt(message[1]);
-                        if(roomId!=-1){
-                            Platform.runLater(() -> {
-                                FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
-                                IGameController controller=loader.getController();
-                                controller.createOnlineGameInterface(roomId);
-                            });
-                        }
-                    }
-                    catch(InterruptedException e){
-                        e.printStackTrace();
-                        System.out.println("Catch interruption.");
-                    }
-                }).start();
+                RoomConnectionListener listener=gameEntryListener(null, networkManager, selectedGame, currentPlayer, actionEvent);
+                new RoomConnector(networkManager, listener).createRoom(selectedGame, size, currentPlayer.getName());
             }
             catch(Exception e){
                 e.printStackTrace();
@@ -227,40 +207,36 @@ public class MenuController implements IController{
             joinErrorMessageLabel.setVisible(false);
 
             try{
-                //Communication avec le serveur
-                networkManager.connectToServer();
-                networkManager.sendMessageToServer(Commands.JOIN_ROOM+" "+roomId+" "+selectedGame+" "+currentPlayer.getName());
-
-                new Thread(() -> {
-                    try{
-                        String input=networkManager.receiveMessageFromServer();
-                        String[] message=input.split(" ");
-
-                        boolean isJoin=Boolean.parseBoolean(message[1]);
-                        if(isJoin){
-                            Platform.runLater(() -> {
-                                FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
-                                IGameController controller=loader.getController();
-                                controller.createOnlineGameInterface(roomId);
-                            });
-                        }
-                        else{
-                            Platform.runLater(() -> {
-                                joinErrorMessageLabel.setText(Constants.ERROR_MESSAGE_JOIN_ROOM);
-                                joinErrorMessageLabel.setVisible(true);
-                            });
-                        }
-                    }
-                    catch(InterruptedException e){
-                        e.printStackTrace();
-                        System.out.println("Catch interruption.");
-                    }
-                }).start();
+                RoomConnectionListener listener=gameEntryListener(joinErrorMessageLabel, networkManager, selectedGame, currentPlayer, actionEvent);
+                new RoomConnector(networkManager, listener).joinRoom(roomId, selectedGame, currentPlayer.getName());
             }
             catch(Exception e){
                 e.printStackTrace();
                 System.out.println("Cannot join tic tac toe boardgame.");
             }
+        }
+
+        //Réactions de l'interface à l'entrée dans une salle
+        private static RoomConnectionListener gameEntryListener(Label joinErrorMessageLabel, NetworkManager networkManager, Games selectedGame, Player currentPlayer, ActionEvent actionEvent){
+            return new RoomConnectionListener(){
+                @Override
+                public void onRoomEntered(int roomId){
+                    Platform.runLater(() -> {
+                        FXMLLoader loader=ViewChanger.changeSceneToGame(actionEvent, selectedGame, currentPlayer, networkManager);
+                        IGameController controller=loader.getController();
+                        controller.createOnlineGameInterface(roomId);
+                    });
+                }
+
+                @Override
+                public void onRoomJoinFailed(){
+                    if(joinErrorMessageLabel==null) return;
+                    Platform.runLater(() -> {
+                        joinErrorMessageLabel.setText(Constants.ERROR_MESSAGE_JOIN_ROOM);
+                        joinErrorMessageLabel.setVisible(true);
+                    });
+                }
+            };
         }
     }
 }

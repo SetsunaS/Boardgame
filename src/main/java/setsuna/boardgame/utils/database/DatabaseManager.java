@@ -6,14 +6,42 @@ import java.sql.*;
 import java.util.Properties;
 
 public class DatabaseManager{
-    private static Connection getConnection(){
-        Properties properties=new Properties();
+    private static Connection connection;
+    private static String url;
+    private static String username;
+    private static String password;
+
+    //Permet aux tests de cibler une autre base de données que celle de database.properties
+    static synchronized void overrideConnectionConfiguration(String newUrl, String newUsername, String newPassword){
         try{
-            properties.load(GameApplication.class.getResourceAsStream(Constants.DATABASE_PROPERTIES_PATH));
-            String url=properties.getProperty("database.url");
-            String username=properties.getProperty("database.username");
-            String password=properties.getProperty("database.password");
-            return DriverManager.getConnection(url, username, password);
+            if(connection!=null && !connection.isClosed()) connection.close();
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            System.out.println("Error while closing connection.");
+        }
+
+        connection=null;
+        url=newUrl;
+        username=newUsername;
+        password=newPassword;
+    }
+
+    private static void loadConfiguration() throws Exception{
+        Properties properties=new Properties();
+        properties.load(GameApplication.class.getResourceAsStream(Constants.DATABASE_PROPERTIES_PATH));
+        url=properties.getProperty("database.url");
+        username=properties.getProperty("database.username");
+        password=properties.getProperty("database.password");
+    }
+
+    private static synchronized Connection getConnection(){
+        try{
+            if(connection==null || connection.isClosed()){
+                if(url==null) loadConfiguration();
+                connection=DriverManager.getConnection(url, username, password);
+            }
+            return connection;
         }
         catch(Exception e){
             e.printStackTrace();
@@ -24,15 +52,14 @@ public class DatabaseManager{
 
     public static boolean usernameAlreadyTaken(String username){
         String query="SELECT * FROM player WHERE username=?";
-        try(Connection connection=DatabaseManager.getConnection();
-            PreparedStatement statement=connection.prepareStatement(query)){
+        Connection connection=DatabaseManager.getConnection();
+        if(connection==null) return false;
+
+        try(PreparedStatement statement=connection.prepareStatement(query)){
             statement.setString(1, username);
 
-            //Exécute la requête et vérifie s'il y a au moins un résultat
             try(ResultSet resultSet=statement.executeQuery()){
-                if(resultSet.next()){
-                    return true;
-                }
+                if(resultSet.next()) return true;
             }
         }
         catch(SQLException e){
@@ -45,15 +72,14 @@ public class DatabaseManager{
 
     public static boolean emailAlreadyTaken(String email){
         String query="SELECT * FROM player WHERE email=?";
-        try(Connection connection=DatabaseManager.getConnection();
-            PreparedStatement statement=connection.prepareStatement(query)){
+        Connection connection=DatabaseManager.getConnection();
+        if(connection==null) return false;
+
+        try(PreparedStatement statement=connection.prepareStatement(query)){
             statement.setString(1, email);
 
-            //Exécute la requête et vérifie s'il y a au moins un résultat
             try(ResultSet resultSet=statement.executeQuery()){
-                if(resultSet.next()){
-                    return true;
-                }
+                if(resultSet.next()) return true;
             }
         }
         catch(SQLException e){
@@ -66,8 +92,10 @@ public class DatabaseManager{
 
     public static boolean insertNewPlayer(String username, String email, String hashedPassword){
         String query="INSERT INTO player(username, email, hashed_password) VALUES (?, ?, ?)";
-        try(Connection connection=DatabaseManager.getConnection();
-            PreparedStatement statement=connection.prepareStatement(query)){
+        Connection connection=DatabaseManager.getConnection();
+        if(connection==null) return false;
+
+        try(PreparedStatement statement=connection.prepareStatement(query)){
             statement.setString(1, username);
             statement.setString(2, email);
             statement.setString(3, hashedPassword);
@@ -85,9 +113,11 @@ public class DatabaseManager{
     public static boolean insertNewScore(String username, int score){
         String query="INSERT INTO score(score, player_id) VALUES (?, ?)";
         int playerId=getPlayerId(username);
+
         if(playerId>-1){
-            try(Connection connection=DatabaseManager.getConnection();
-                PreparedStatement statement=connection.prepareStatement(query)){
+            Connection connection=DatabaseManager.getConnection();
+            if(connection==null) return false;
+            try(PreparedStatement statement=connection.prepareStatement(query)){
                 statement.setInt(1, score);
                 statement.setInt(2, playerId);
 
@@ -108,16 +138,15 @@ public class DatabaseManager{
 
     public static boolean isUsernameInDatabase(String username){
         String query="SELECT * FROM player WHERE username=? or email=?";
-        try(Connection connection=DatabaseManager.getConnection();
-            PreparedStatement statement=connection.prepareStatement(query)){
+        Connection connection=DatabaseManager.getConnection();
+        if(connection==null) return false;
+
+        try(PreparedStatement statement=connection.prepareStatement(query)){
             statement.setString(1, username);
             statement.setString(2, username);
 
-            //Exécute la requête et vérifie s'il y a au moins un résultat
             try(ResultSet resultSet=statement.executeQuery()){
-                if(resultSet.next()){
-                    return true;
-                }
+                if(resultSet.next()) return true;
             }
         }
         catch(SQLException e){
@@ -130,15 +159,14 @@ public class DatabaseManager{
 
     public static int getPlayerId(String username){
         String query="SELECT id FROM player WHERE username=?";
-        try(Connection connection=DatabaseManager.getConnection();
-            PreparedStatement statement=connection.prepareStatement(query)){
+        Connection connection=DatabaseManager.getConnection();
+        if(connection==null) return -1;
+
+        try(PreparedStatement statement=connection.prepareStatement(query)){
             statement.setString(1, username);
 
-            //Exécute la requête et vérifie s'il y a au moins un résultat
             try(ResultSet resultSet=statement.executeQuery()){
-                if(resultSet.next()){
-                    return resultSet.getInt(1);
-                }
+                if(resultSet.next()) return resultSet.getInt(1);
             }
         }
         catch(SQLException e){
@@ -151,15 +179,14 @@ public class DatabaseManager{
 
     public static String getPlayerUsername(String email){
         String query="SELECT username FROM player WHERE email=?";
-        try(Connection connection=DatabaseManager.getConnection();
-            PreparedStatement statement=connection.prepareStatement(query)){
+        Connection connection=DatabaseManager.getConnection();
+        if(connection==null) return null;
+
+        try(PreparedStatement statement=connection.prepareStatement(query)){
             statement.setString(1, email);
 
-            //Exécute la requête et vérifie s'il y a au moins un résultat
             try(ResultSet resultSet=statement.executeQuery()){
-                if(resultSet.next()){
-                    return resultSet.getString(1);
-                }
+                if(resultSet.next()) return resultSet.getString(1);
             }
         }
         catch(SQLException e){
@@ -172,16 +199,15 @@ public class DatabaseManager{
 
     public static String getPlayerHashedPasword(String username){
         String query="SELECT hashed_password FROM player WHERE username=? OR email=?";
-        try(Connection connection=DatabaseManager.getConnection();
-            PreparedStatement statement=connection.prepareStatement(query)){
+        Connection connection=DatabaseManager.getConnection();
+        if(connection==null) return null;
+
+        try(PreparedStatement statement=connection.prepareStatement(query)){
             statement.setString(1, username);
             statement.setString(2, username);
 
-            //Exécute la requête et vérifie s'il y a au moins un résultat
             try(ResultSet resultSet=statement.executeQuery()){
-                if(resultSet.next()){
-                    return resultSet.getString(1);
-                }
+                if(resultSet.next()) return resultSet.getString(1);
             }
         }
         catch(SQLException e){
@@ -196,16 +222,15 @@ public class DatabaseManager{
         String query="SELECT score FROM player " +
                      "JOIN score ON player.id=score.player_id " +
                      "WHERE username=? OR email=?";
-        try(Connection connection=DatabaseManager.getConnection();
-            PreparedStatement statement=connection.prepareStatement(query)){
+        Connection connection=DatabaseManager.getConnection();
+        if(connection==null) return -1;
+
+        try(PreparedStatement statement=connection.prepareStatement(query)){
             statement.setString(1, username);
             statement.setString(2, username);
 
-            //Exécute la requête et vérifie s'il y a au moins un résultat
             try(ResultSet resultSet=statement.executeQuery()){
-                if(resultSet.next()){
-                    return resultSet.getInt(1);
-                }
+                if(resultSet.next()) return resultSet.getInt(1);
             }
         }
         catch(SQLException e){
@@ -218,15 +243,14 @@ public class DatabaseManager{
 
     public static boolean updatePlayerScore(String username, int score){
         String query="UPDATE score SET score=? WHERE player_id=?";
+        Connection connection=DatabaseManager.getConnection();
+        if(connection==null) return false;
 
-        try(Connection connection=DatabaseManager.getConnection();
-            PreparedStatement statement=connection.prepareStatement(query)){
-
+        try(PreparedStatement statement=connection.prepareStatement(query)){
             int playerId=getPlayerId(username);
             statement.setInt(1, score);
             statement.setInt(2, playerId);
 
-            //Exécute la requête et vérifie s'il y a au moins un résultat
             if(statement.executeUpdate()>0) return true;
         }
         catch(SQLException e){
