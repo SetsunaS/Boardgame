@@ -90,6 +90,16 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
+                <configuration>
+                    <!-- Exclut la couche JavaFX, non testable sans toolkit graphique -->
+                    <excludes>
+                        <exclude>setsuna/boardgame/controller/**</exclude>
+                        <exclude>setsuna/boardgame/GameApplication.class</exclude>
+                        <exclude>setsuna/boardgame/GameApplication2.class</exclude>
+                        <exclude>setsuna/boardgame/utils/ViewChanger.class</exclude>
+                        <exclude>setsuna/boardgame/utils/CustomAlert.class</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
