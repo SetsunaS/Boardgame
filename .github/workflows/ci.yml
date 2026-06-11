@@ -20,8 +20,11 @@ jobs:
           cache: maven
 
       # Docker est préinstallé sur ubuntu-latest : les tests Testcontainers tournent aussi en CI
+      # chmod : le bit exécutable de mvnw se perd facilement depuis Windows
       - name: Build and test
-        run: ./mvnw --batch-mode verify
+        run: |
+          chmod +x mvnw
+          ./mvnw --batch-mode verify
 
       - name: Coverage summary
         if: always()
